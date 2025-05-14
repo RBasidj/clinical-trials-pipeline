@@ -1,9 +1,7 @@
 # API Keys and Credentials
 .env
 *.pem
-key.json
-CleanTrialsV2/keys/clinicaltrials-v1-4a9a9eb9fec8.json
-*credentials*.json
+servicekey.json
 
 # Cache files
 __pycache__/
