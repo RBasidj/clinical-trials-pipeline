@@ -1,0 +1,32 @@
+# API Keys and Credentials
+.env
+*.pem
+key.json
+CleanTrialsV2/keys/clinicaltrials-v1-4a9a9eb9fec8.json
+*credentials*.json
+
+# Cache files
+__pycache__/
+*.py[cod]
+*$py.class
+cache/
+.pytest_cache/
+
+# Output directories (optional - ignore if you don't want these tracked)
+data/
+results/
+figures/
+
+# Virtual environment
+trials_venv/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clinical Trials Analysis Pipeline</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 2rem; }
+        .form-container { max-width: 700px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1 class="mb-4">Clinical Trials Analysis Pipeline</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form action="/run_analysis" method="post">
+                        <div class="mb-3">
+                            <label for="disease" class="form-label">Disease/Condition</label>
+                            <input type="text" class="form-control" id="disease" name="disease" 
+                                  value="Familial Hypercholesterolemia" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="max_trials" class="form-label">Maximum Trials to Process</label>
+                            <input type="number" class="form-control" id="max_trials" name="max_trials" 
+                                   value="50" min="5" max="500" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="years_back" class="form-label">Years to Look Back</label>
+                            <input type="number" class="form-control" id="years_back" name="years_back" 
+                                   value="15" min="1" max="30" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="industry_only" name="industry_only" checked>
+                            <label class="form-check-label" for="industry_only">Industry-Sponsored Studies Only</label>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="financial_analysis" name="financial_analysis" checked>
+                            <label class="form-check-label" for="financial_analysis">Include Financial Analysis</label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Run Analysis</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">About This Tool</h5>
+                </div>
+                <div class="card-body">
+                    <p>This pipeline extracts, enriches, and analyzes clinical trials data from ClinicalTrials.gov for a specified disease or condition. It uses AI to determine modality and target information for each intervention and generates comprehensive reports.</p>
+                    <p>Features include:</p>
+                    <ul>
+                        <li>Automatic extraction of trial data from ClinicalTrials.gov API</li>
+                        <li>AI-powered enrichment of drug modality and target information</li>
+                        <li>Quantitative summary statistics and visualizations</li>
+                        <li>Competitive landscape analysis with links to company information</li>
+                        <li>Threshold analysis for clinical relevance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

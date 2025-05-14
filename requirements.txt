@@ -1,0 +1,10 @@
+requests>=2.28.0
+pandas>=1.4.0
+openai>=1.0.0
+python-dotenv>=0.20.0
+matplotlib>=3.5.0
+seaborn>=0.12.0
+yfinance>=0.2.61
+flask>=2.2.0
+google-cloud-storage>=2.0.0
+gunicorn>=20.0.0

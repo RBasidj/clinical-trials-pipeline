@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Results - {{ disease }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 2rem; }
+        .visualization-card { margin-bottom: 2rem; }
+        .visualization-card img { max-width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Analysis Results: {{ disease }}</h1>
+        
+        <div class="mb-4">
+            <a href="/" class="btn btn-outline-primary">New Analysis</a>
+            
+            <!-- Download links using cloud URLs -->
+            {% if file_urls and file_urls.items()|length > 0 %}
+                {% if 'results/report.md' in file_urls %}
+                    <a href="{{ file_urls['results/report.md'] }}" class="btn btn-outline-success" target="_blank">View Full Report</a>
+                {% elif 'results/report.md' in file_urls.keys() %}
+                    <a href="{{ file_urls['results/report.md'] }}" class="btn btn-outline-success" target="_blank">View Full Report</a>
+                {% endif %}
+                
+                {% if 'results/summary.json' in file_urls %}
+                    <a href="{{ file_urls['results/summary.json'] }}" class="btn btn-outline-secondary" target="_blank">Download JSON Data</a>
+                {% elif 'results/summary.json' in file_urls.keys() %}
+                    <a href="{{ file_urls['results/summary.json'] }}" class="btn btn-outline-secondary" target="_blank">Download JSON Data</a>
+                {% endif %}
+                
+                {% if 'data/clinical_trials.csv' in file_urls %}
+                    <a href="{{ file_urls['data/clinical_trials.csv'] }}" class="btn btn-outline-info" target="_blank">Download Trials CSV</a>
+                {% elif 'data/clinical_trials.csv' in file_urls.keys() %}
+                    <a href="{{ file_urls['data/clinical_trials.csv'] }}" class="btn btn-outline-info" target="_blank">Download Trials CSV</a>
+                {% endif %}
+                
+                {% if 'data/interventions.csv' in file_urls %}
+                    <a href="{{ file_urls['data/interventions.csv'] }}" class="btn btn-outline-info" target="_blank">Download Interventions CSV</a>
+                {% elif 'data/interventions.csv' in file_urls.keys() %}
+                    <a href="{{ file_urls['data/interventions.csv'] }}" class="btn btn-outline-info" target="_blank">Download Interventions CSV</a>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning">
+                    No downloadable files are available. Files might not have been properly uploaded to cloud storage.
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Summary Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if summary and summary.quantitative_summary %}
+                            <p><strong>Total Trials:</strong> {{ summary.quantitative_summary.total_trials }}</p>
+                            <p><strong>Total Interventions:</strong> {{ summary.quantitative_summary.total_interventions }}</p>
+                            {% if summary.quantitative_summary.modalities %}
+                                <p><strong>Modalities Explored:</strong> {{ summary.quantitative_summary.modalities.count }}</p>
+                            {% endif %}
+                            {% if summary.quantitative_summary.targets %}
+                                <p><strong>Biological Targets:</strong> {{ summary.quantitative_summary.targets.count }}</p>
+                            {% endif %}
+                            {% if summary.quantitative_summary.sponsors %}
+                                <p><strong>Total Sponsors:</strong> {{ summary.quantitative_summary.sponsors.count }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p>Summary statistics not available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Analysis Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Run ID:</strong> {{ run_id }}</p>
+                        <p><strong>Disease/Condition:</strong> {{ disease }}</p>
+                        <p><strong>Max Trials:</strong> {{ run_info.max_trials }}</p>
+                        <p><strong>Years Back:</strong> {{ run_info.years_back }}</p>
+                        <p><strong>Industry Only:</strong> {% if run_info.industry_only %}Yes{% else %}No{% endif %}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-{% if run_info.status == 'completed' %}success{% elif run_info.status == 'error' %}danger{% else %}warning{% endif %}">{{ run_info.status }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visualizations Section -->
+        <h3 class="mb-3">Visualizations</h3>
+        
+        {% if visualizations and visualizations|length > 0 %}
+            <div class="row">
+                {% for viz in visualizations %}
+                <div class="col-md-6">
+                    <div class="card visualization-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ viz.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="{{ viz.url }}" alt="{{ viz.name }}" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No visualizations available. This could be because:
+                <ul>
+                    <li>No visualization files were generated</li>
+                    <li>Files were not properly uploaded to cloud storage</li>
+                    <li>The analysis did not find enough data to create visualizations</li>
+                </ul>
+                
+                <p class="mt-3">Try running the analysis again with different parameters or check the local figures directory.</p>
+            </div>
+        {% endif %}
+        
+        <!-- Qualitative Insights Section -->
+        <h3 class="mb-3">Qualitative Insights</h3>
+        
+        {% if summary and summary.qualitative_insights %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% if summary.qualitative_insights.modality_trends %}
+                        <h5>Trends in Mechanism of Action and Modality</h5>
+                        <ul>
+                            {% for trend in summary.qualitative_insights.modality_trends %}
+                            <li>{{ trend }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    {% if summary.qualitative_insights.outcome_trends %}
+                        <h5>Trends in Primary and Secondary Outcome Measures</h5>
+                        <ul>
+                            {% for trend in summary.qualitative_insights.outcome_trends %}
+                            <li>{{ trend }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    {% if summary.qualitative_insights.design_trends %}
+                        <h5>Observations About Trial Design</h5>
+                        <ul>
+                            {% for trend in summary.qualitative_insights.design_trends %}
+                            <li>{{ trend }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Qualitative insights not available.
+            </div>
+        {% endif %}
+        
+        <!-- Debug Information (only show if there are issues) -->
+        {% if run_info.status == 'error' or 'storage_error' in run_info %}
+            <h3 class="mb-3">Debug Information</h3>
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% if run_info.status == 'error' %}
+                        <h5>Error Running Pipeline</h5>
+                        <pre class="bg-light p-3">{{ run_info.error }}</pre>
+                    {% endif %}
+                    
+                    {% if 'storage_error' in run_info %}
+                        <h5>Cloud Storage Error</h5>
+                        <pre class="bg-light p-3">{{ run_info.storage_error }}</pre>
+                    {% endif %}
+                    
+                    <h5>Available Files (Local)</h5>
+                    <ul>
+                        {% for dir in ['data', 'results', 'figures'] %}
+                            <li>
+                                {{ dir }}:
+                                {% set files = get_local_files(dir) %}
+                                {% if files %}
+                                    <ul>
+                                        {% for file in files %}
+                                            <li><a href="/{{ dir }}/{{ file }}">{{ file }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    No files found
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

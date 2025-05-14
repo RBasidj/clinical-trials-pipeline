@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Error</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Analysis Error</h1>
+        
+        <div class="alert alert-danger mb-4">
+            <h4 class="alert-heading">An error occurred during analysis</h4>
+            <p>The analysis could not be completed due to an error. See details below.</p>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Error Details</h5>
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3">{{ error }}</pre>
+                
+                <div class="mt-4">
+                    <a href="/" class="btn btn-primary">Try Again</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Analysis Request Details</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Run ID:</strong> {{ run_id }}</p>
+                <p><strong>Disease:</strong> {{ run_info.disease }}</p>
+                <p><strong>Max Trials:</strong> {{ run_info.max_trials }}</p>
+                <p><strong>Years Back:</strong> {{ run_info.years_back }}</p>
+                <p><strong>Industry Only:</strong> {% if run_info.industry_only %}Yes{% else %}No{% endif %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
