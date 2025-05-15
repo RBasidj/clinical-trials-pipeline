@@ -6,7 +6,8 @@ import os
 import yfinance as yf
 from collections import defaultdict
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import hashlib
 import time
@@ -141,7 +142,7 @@ def lookup_stocks_parallel(ticker_list, max_workers=20):
         
         # Process results as they complete
         results = []
-        for future in ThreadPoolExecutor.as_completed(futures):
+        for future in concurrent.futures.as_completed(futures):
             results.append(future.result())
     
     return results

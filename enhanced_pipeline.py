@@ -1046,6 +1046,9 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
     
     return summary
 
+## File: enhanced_pipeline.py
+## Location: Update main function to ensure time logging
+
 def main():
     """Run the enhanced pipeline with all enhancements"""
     # Parse command line arguments
@@ -1063,10 +1066,10 @@ def main():
     print(f"Max trials: {'Unlimited' if max_trials == 0 else max_trials}")
     print(f"Financial analysis: {'Skipped' if skip_financial else 'Enabled'}")
     
-    start_time = time.time()
+    overall_start_time = time.time()
     
-    start = time.time()
     # Step 1: Fetch clinical trials with the corrected API query format
+    step_start = time.time()
     raw_trials = fetch_clinical_trials(
         disease, 
         industry_sponsored=industry_sponsored, 
@@ -1075,9 +1078,7 @@ def main():
         years_back=years_back,
         max_results=max_trials
     )
-    end = time.time()
-    print(f"[TIMER] Fetching trials took {end - start:.2f}s")
-
+    print(f"[TIMER] Data extraction took {time.time() - step_start:.2f}s")
 
     if not raw_trials:
         print("No trials found. Exiting pipeline.")
@@ -1085,54 +1086,56 @@ def main():
     
     print(f"Found {len(raw_trials)} trials from the API.")
     
-    start = time.time()
     # Step 2: Process clinical trials data
+    step_start = time.time()
     processed_trials = extract_study_details(raw_trials)
-    end = time.time()
-    print(f"[TIMER] Processing took {end - start:.2f}s")
+    print(f"[TIMER] Data processing took {time.time() - step_start:.2f}s")
 
     # Step 3: Extract unique interventions
+    step_start = time.time()
     unique_interventions = extract_unique_interventions(processed_trials)
+    print(f"[TIMER] Intervention extraction took {time.time() - step_start:.2f}s")
     
-    start = time.time()
     # Step 4: Enrich interventions with OpenAI
+    step_start = time.time()
     enriched_interventions = enrich_interventions(unique_interventions, use_openai=use_openai)
-    end = time.time()
-    print(f"[TIMER] Enrichment took {end - start:.2f}s")
+    print(f"[TIMER] Enrichment took {time.time() - step_start:.2f}s")
 
     # Step 5: Generate visualizations
-    start = time.time()
+    step_start = time.time()
     visualization_files = create_visualizations(processed_trials, enriched_interventions)
-    print(f"[TIMER] Visualization took {time.time() - start:.2f}s")
+    print(f"[TIMER] Visualization took {time.time() - step_start:.2f}s")
     print(f"Generated {len(visualization_files)} visualization files")
 
     # Step 6: Generate qualitative insights
-    start = time.time()
+    step_start = time.time()
     qualitative_insights = generate_qualitative_insights(processed_trials, enriched_interventions)
-    print(f"[TIMER] Qualitative insights took {time.time() - start:.2f}s")
+    print(f"[TIMER] Qualitative insights took {time.time() - step_start:.2f}s")
 
-    # Step 7: Financial/biotech specific analysis
-    start = time.time()
+    # Steps 7-9: Financial analysis (conditional)
     if skip_financial:
         print("Skipping financial analysis...")
-        company_analysis = get_companies_from_drugs(enriched_interventions, skip_financial=True)
+        company_analysis = []
         competitive_landscape = []
         threshold_analysis = {"skipped": True}
     else:
+        # Step 7: Financial/biotech specific analysis
+        step_start = time.time()
         company_analysis = get_companies_from_drugs(enriched_interventions)
-        print(f"[TIMER] Company analysis took {time.time() - start:.2f}s")
+        print(f"[TIMER] Company analysis took {time.time() - step_start:.2f}s")
 
         # Step 8: Competitive landscape analysis
-        start = time.time()
+        step_start = time.time()
         competitive_landscape = analyze_competitive_landscape(processed_trials, company_analysis)
-        print(f"[TIMER] Competitive landscape analysis took {time.time() - start:.2f}s")
+        print(f"[TIMER] Competitive landscape analysis took {time.time() - step_start:.2f}s")
         
         # Step 9: Threshold analysis
-        start = time.time()
+        step_start = time.time()
         threshold_analysis = analyze_clinical_thresholds(processed_trials, disease)
-        print(f"[TIMER] Threshold analysis took {time.time() - start:.2f}s")
+        print(f"[TIMER] Threshold analysis took {time.time() - step_start:.2f}s")
 
     # Step 10: Save data to CSV
+    step_start = time.time()
     save_to_csv(
         processed_trials,
         "clinical_trials.csv",
@@ -1145,8 +1148,10 @@ def main():
         "interventions.csv",
         ["name", "modality", "target", "source"]
     )
+    print(f"[TIMER] CSV generation took {time.time() - step_start:.2f}s")
     
     # Step 11: Generate final summary report with all analyses
+    step_start = time.time()
     summary = generate_summary(
         processed_trials, 
         enriched_interventions,
@@ -1155,11 +1160,11 @@ def main():
         competitive_landscape=competitive_landscape,
         threshold_analysis=threshold_analysis
     )
+    print(f"[TIMER] Summary generation took {time.time() - step_start:.2f}s")
     
-    end_time = time.time()
-    execution_time = end_time - start_time
+    overall_execution_time = time.time() - overall_start_time
     
-    print(f"\n===== Pipeline completed in {execution_time:.2f} seconds =====\n")
+    print(f"\n===== Pipeline completed in {overall_execution_time:.2f} seconds =====\n")
     
     print("Output files:")
     print(f"- Clinical trials data: {os.path.join(DATA_DIR, 'clinical_trials.csv')}")
@@ -1167,6 +1172,9 @@ def main():
     print(f"- Summary: {os.path.join(RESULTS_DIR, 'summary.json')}")
     print(f"- Report: {os.path.join(RESULTS_DIR, 'report.md')}")
     print(f"- Visualizations: {', '.join(visualization_files)}")
+    
+    print("\n===== Performance Summary =====")
+    print(f"Total execution time: {overall_execution_time:.2f} seconds")
     
     return summary
 

@@ -64,33 +64,35 @@ def run_analysis():
     if not financial_analysis:
         cmd.append('--skip-financial')
     
-    # Run the pipeline
+        # Run the pipeline
     try:
         print(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
-
-
+        
+        # Initialize files_exist variable before using it
+        files_exist = False
+        
         if result.returncode != 0:
             print(f"Pipeline execution failed: {result.stderr}")
             runs[run_id]['status'] = 'error'
             runs[run_id]['error'] = result.stderr
         else:
             print(f"Pipeline executed successfully: {result.stdout}")
+            
+            # Check if output files exist
+            files_exist = False
+            for directory in ['data', 'results', 'figures']:
+                if os.path.exists(directory) and os.listdir(directory):
+                    files_exist = True
+                    break
+                    
+            if not files_exist:
+                runs[run_id]['status'] = 'error'
+                runs[run_id]['error'] = "Pipeline ran successfully but did not generate output files"
+                return redirect(url_for('results', run_id=run_id))
+                
+            # Upload files to cloud storage
 
-            files_exist = any(
-                os.path.exists(d) and os.listdir(d) for d in ['data', 'results', 'figures']
-            )
-
-            ## File: app.py
-            ## Location: Modify the portion of run_analysis that handles cloud storage
-
-            # After running the pipeline successfully and checking if files exist
-        if not files_exist:
-            runs[run_id]['status'] = 'error'
-            runs[run_id]['error'] = "Pipeline ran successfully but did not generate output files"
-            return redirect(url_for('results', run_id=run_id))
-    
-        # Try to upload to cloud storage but make it optional
         try:
             from cloud_storage import upload_pipeline_outputs
             file_urls = upload_pipeline_outputs(run_id)
