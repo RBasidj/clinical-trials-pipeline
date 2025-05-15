@@ -16,6 +16,64 @@ from datetime import datetime, timedelta
 from visualization import create_visualizations
 from analysis import generate_qualitative_insights
 from financial_analysis import get_companies_from_drugs, analyze_competitive_landscape, analyze_clinical_thresholds
+import concurrent.futures
+import threading
+import hashlib
+import pickle
+import time
+
+def cache_key(func_name, args_dict):
+    """Generate a cache key from function name and arguments"""
+    # Convert args to a stable string representation and hash it
+    args_str = str(sorted(args_dict.items()))
+    return f"{func_name}_{hashlib.md5(args_str.encode()).hexdigest()}"
+
+def cache_result(cache_dir, key, result, expiry_days=30):
+    """Cache a result with expiration time"""
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f"{key}.pkl")
+    
+    # Store the result along with timestamp
+    data = {
+        "timestamp": time.time(),
+        "expiry_days": expiry_days,
+        "result": result
+    }
+    
+    try:
+        with open(cache_file, "wb") as f:
+            pickle.dump(data, f)
+        print(f"Cached result to {cache_file}")
+        return True
+    except Exception as e:
+        print(f"Error caching result: {e}")
+        return False
+
+def get_cached_result(cache_dir, key):
+    """Retrieve a cached result if valid"""
+    cache_file = os.path.join(cache_dir, f"{key}.pkl")
+    
+    if not os.path.exists(cache_file):
+        return None
+    
+    try:
+        with open(cache_file, "rb") as f:
+            data = pickle.load(f)
+        
+        # Check if expired
+        now = time.time()
+        expiry_seconds = data["expiry_days"] * 86400  # Convert days to seconds
+        if now - data["timestamp"] > expiry_seconds:
+            # Cache expired
+            print(f"Cache expired for {cache_file}")
+            return None
+        
+        print(f"Retrieved cached result from {cache_file}")
+        return data["result"]
+    except Exception as e:
+        print(f"Error reading cache: {e}")
+        return None
+
 
 
 # Check for required packages
@@ -97,10 +155,30 @@ for directory in [CACHE_DIR, DATA_DIR, RESULTS_DIR, FIGURES_DIR]:
     os.makedirs(directory, exist_ok=True)
     print(f"Created directory: {directory}")
 
+## File: enhanced_pipeline.py
+## Location: Replace the fetch_clinical_trials function completely
+
 def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
                          human_studies=True, years_back=15, max_results=None):
-    """Fetch clinical trials for a disease using the v2 API"""
+    """Fetch clinical trials for a disease using the v2 API with caching"""
     print(f"Fetching clinical trials for {disease}")
+    
+    # Generate cache key
+    cache_args = {
+        "disease": disease,
+        "industry_sponsored": industry_sponsored,
+        "interventional": interventional,
+        "human_studies": human_studies,
+        "years_back": years_back,
+        "max_results": max_results
+    }
+    key = cache_key("fetch_clinical_trials", cache_args)
+    
+    # Check cache first
+    cached_result = get_cached_result(CACHE_DIR, key)
+    if cached_result is not None:
+        print(f"Retrieved {len(cached_result)} trials from cache")
+        return cached_result
     
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     
@@ -222,7 +300,13 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
             all_studies = all_studies[:max_results]
         
         print(f"Total studies after all pages and filtering: {len(all_studies)}")
+        
+        # Cache the result before returning
+        if all_studies:
+            cache_result(CACHE_DIR, key, all_studies)
+        
         return all_studies
+    
     except Exception as e:
         print(f"Error fetching data: {e}")
         return []
@@ -396,13 +480,29 @@ def infer_modality_from_name(drug_name):
     # Default if no pattern matches
     return "small molecule"
 
-def query_openai_for_drug_info(drug_name):
+## File: enhanced_pipeline.py
+## Location: Modify query_openai_for_drug_info function to accept a client parameter
+
+## File: enhanced_pipeline.py
+## Location: Replace the entire query_openai_for_drug_info function
+
+def query_openai_for_drug_info(drug_name, client=None):
     """
     Use OpenAI API to get information about a drug
-    Updated for OpenAI API 1.0+
+    Updated for OpenAI API 1.0+ with caching and client parameter for thread safety
     """
     if not OPENAI_AVAILABLE:
         return None
+    
+    # Generate cache key
+    cache_args = {"drug_name": drug_name.lower()}  # Lowercase for consistent caching
+    key = cache_key("query_openai_for_drug_info", cache_args)
+    
+    # Check cache first
+    cached_result = get_cached_result(CACHE_DIR, key)
+    if cached_result is not None:
+        print(f"Retrieved OpenAI info for {drug_name} from cache")
+        return cached_result
     
     try:
         print(f"Querying OpenAI for information about {drug_name}")
@@ -424,9 +524,10 @@ def query_openai_for_drug_info(drug_name):
         If you're unsure, use "unknown" for the value and "low" for confidence.
         """
         
-        # Call OpenAI API using the new format
-        from openai import OpenAI
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # Use provided client or create a new one
+        if client is None:
+            from openai import OpenAI
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -437,7 +538,7 @@ def query_openai_for_drug_info(drug_name):
             max_tokens=300
         )
         
-        # Extract response content (new format)
+        # Extract response content
         content = response.choices[0].message.content
         
         # Try to parse JSON from the response
@@ -450,11 +551,16 @@ def query_openai_for_drug_info(drug_name):
                 json_str = content[start_idx:end_idx]
                 data = json.loads(json_str)
                 
-                return {
+                result = {
                     "modality": data.get("modality", "unknown"),
                     "target": data.get("target", "unknown"),
                     "confidence": data.get("confidence", "low")
                 }
+                
+                # Cache successful result
+                cache_result(CACHE_DIR, key, result)
+                
+                return result
             else:
                 print(f"Could not find JSON in response: {content}")
                 return None
@@ -465,15 +571,27 @@ def query_openai_for_drug_info(drug_name):
     except Exception as e:
         print(f"Error querying OpenAI: {e}")
         return None
-        
-def enrich_interventions(interventions, use_openai=True):
+
+
+def enrich_interventions(interventions, use_openai=True, max_workers=5):
     """
-    Enrich interventions with modality and target information
+    Enrich interventions with modality and target information using parallel processing
     """
-    print(f"Enriching {len(interventions)} interventions")
+    print(f"Enriching {len(interventions)} interventions with parallel processing")
     enriched_data = []
     
-    for intervention in interventions:
+    # Use thread-local storage for OpenAI client
+    local = threading.local()
+    
+    def get_openai_client():
+        """Get or create thread-local OpenAI client"""
+        if not hasattr(local, 'openai_client'):
+            from openai import OpenAI
+            local.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        return local.openai_client
+    
+    def process_intervention(intervention):
+        """Process a single intervention (for parallel execution)"""
         try:
             # Default values
             modality = "unknown"
@@ -483,7 +601,10 @@ def enrich_interventions(interventions, use_openai=True):
             # Try to get info from OpenAI if enabled
             if use_openai and OPENAI_AVAILABLE:
                 print(f"Enriching {intervention} with OpenAI...")
-                openai_result = query_openai_for_drug_info(intervention)
+                
+                # Use thread-local client to avoid concurrency issues
+                client = get_openai_client() if OPENAI_AVAILABLE else None
+                openai_result = query_openai_for_drug_info(intervention, client)
                 
                 if openai_result and openai_result.get("modality") != "unknown":
                     modality = openai_result.get("modality")
@@ -504,22 +625,58 @@ def enrich_interventions(interventions, use_openai=True):
                 # Use pattern-based inference
                 modality = infer_modality_from_name(intervention)
             
-            enriched_data.append({
+            return {
                 "name": intervention,
                 "modality": modality,
                 "target": target,
                 "source": source
-            })
+            }
             
         except Exception as e:
             print(f"Error enriching {intervention}: {e}")
             # Add default data on error
-            enriched_data.append({
+            return {
                 "name": intervention,
                 "modality": "unknown",
                 "target": "unknown",
-                "source": "Error"
-            })
+                "source": f"Error: {str(e)}"
+            }
+    
+    # Execute in parallel if OpenAI is available and enabled
+    if use_openai and OPENAI_AVAILABLE and len(interventions) > 1:
+        # Use ThreadPoolExecutor for I/O-bound tasks like API calls
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_intervention = {
+                executor.submit(process_intervention, intervention): intervention 
+                for intervention in interventions
+            }
+            
+            # Process results as they complete
+            completed = 0
+            for future in concurrent.futures.as_completed(future_to_intervention):
+                intervention = future_to_intervention[future]
+                try:
+                    result = future.result()
+                    enriched_data.append(result)
+                    completed += 1
+                    print(f"Completed enrichment of {intervention} ({completed}/{len(interventions)})")
+                except Exception as e:
+                    print(f"Exception processing {intervention}: {e}")
+                    # Add default data on error
+                    enriched_data.append({
+                        "name": intervention,
+                        "modality": "unknown",
+                        "target": "unknown",
+                        "source": f"Error: {str(e)}"
+                    })
+    else:
+        # Process sequentially if OpenAI is not available or disabled
+        print("Processing interventions sequentially")
+        for idx, intervention in enumerate(interventions):
+            result = process_intervention(intervention)
+            enriched_data.append(result)
+            print(f"Completed enrichment of {intervention} ({idx+1}/{len(interventions)})")
     
     print(f"Successfully enriched {len(enriched_data)} interventions")
     return enriched_data
@@ -893,6 +1050,7 @@ def main():
     
     start_time = time.time()
     
+    start = time.time()
     # Step 1: Fetch clinical trials with the corrected API query format
     raw_trials = fetch_clinical_trials(
         disease, 
@@ -902,38 +1060,58 @@ def main():
         years_back=years_back,
         max_results=max_trials
     )
-    
+    end = time.time()
+    print(f"[TIMER] Fetching trials took {end - start:.2f}s")
+
+
     if not raw_trials:
         print("No trials found. Exiting pipeline.")
         return
     
     print(f"Found {len(raw_trials)} trials from the API.")
     
+    start = time.time()
     # Step 2: Process clinical trials data
     processed_trials = extract_study_details(raw_trials)
-    
+    end = time.time()
+    print(f"[TIMER] Processing took {end - start:.2f}s")
+
     # Step 3: Extract unique interventions
     unique_interventions = extract_unique_interventions(processed_trials)
     
+    start = time.time()
     # Step 4: Enrich interventions with OpenAI
     enriched_interventions = enrich_interventions(unique_interventions, use_openai=use_openai)
-    
+    end = time.time()
+    print(f"[TIMER] Enrichment took {end - start:.2f}s")
+
     # Step 5: Generate visualizations
+    start = time.time()
     visualization_files = create_visualizations(processed_trials, enriched_interventions)
+    print(f"[TIMER] Visualization took {time.time() - start:.2f}s")
     print(f"Generated {len(visualization_files)} visualization files")
-    
+
     # Step 6: Generate qualitative insights
+    start = time.time()
     qualitative_insights = generate_qualitative_insights(processed_trials, enriched_interventions)
-    
+    print(f"[TIMER] Qualitative insights took {time.time() - start:.2f}s")
+
     # Step 7: Financial/biotech specific analysis
+    start = time.time()
     company_analysis = get_companies_from_drugs(enriched_interventions)
-    
+    print(f"[TIMER] Company analysis took {time.time() - start:.2f}s")
+
     # Step 8: Competitive landscape analysis
+    start = time.time()
     competitive_landscape = analyze_competitive_landscape(processed_trials, company_analysis)
+    print(f"[TIMER] Competitive landscape analysis took {time.time() - start:.2f}s")
+
     
     # Step 9: Threshold analysis
+    start = time.time()
     threshold_analysis = analyze_clinical_thresholds(processed_trials, disease)
-    
+    print(f"[TIMER] Threshold analysis took {time.time() - start:.2f}s")
+
     # Step 10: Save data to CSV
     save_to_csv(
         processed_trials,

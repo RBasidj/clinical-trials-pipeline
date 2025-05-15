@@ -3,17 +3,57 @@ import os
 import yfinance as yf
 from collections import defaultdict
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
 
 OPENAI_AVAILABLE = os.getenv("OPENAI_API_KEY") is not None
+
+# ================================
+# Stock Lookup Helpers
+# ================================
+
+def lookup_stock(ticker):
+    """Fetch 1-year performance and market cap for a ticker."""
+    try:
+        if not ticker or ticker.lower() in ['private company', 'unknown']:
+            return {"ticker": ticker, "error": "Invalid or unsupported ticker"}
+
+        stock = yf.Ticker(ticker)
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=365)
+        hist = stock.history(start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'))
+
+        if hist.empty:
+            raise ValueError("No historical data")
+
+        first_price = hist.iloc[0]['Close']
+        last_price = hist.iloc[-1]['Close']
+        percent_change = ((last_price - first_price) / first_price) * 100
+
+        return {
+            'ticker': ticker,
+            'price': last_price,
+            'change_1y': percent_change,
+            'market_cap': stock.info.get('marketCap', 'Unknown')
+        }
+
+    except Exception as e:
+        return {"ticker": ticker, "error": str(e)}
+
+def lookup_stocks_parallel(ticker_list, max_workers=10):
+    """Run stock lookups in parallel."""
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        return list(executor.map(lookup_stock, ticker_list))
+
+# ================================
+# Main Company Mapping + Analysis
+# ================================
 
 def get_companies_from_drugs(interventions):
     """
     Map interventions to companies and get basic stock information
     """
-    
-    # Known drug-company mappings (expand this with OpenAI or a database)
-    company_mappings = {
 
+    company_mappings = {
         'alirocumab': {'company': 'Regeneron/Sanofi', 'tickers': ['REGN', 'SNY']},
         'evolocumab': {'company': 'Amgen', 'tickers': ['AMGN']},
         'mipomersen': {'company': 'Ionis Pharmaceuticals', 'tickers': ['IONS']},
@@ -22,13 +62,13 @@ def get_companies_from_drugs(interventions):
         'rosuvastatin': {'company': 'AstraZeneca', 'tickers': ['AZN']},
         'ezetimibe': {'company': 'Merck', 'tickers': ['MRK']},
     }
-    
-    # OpenAI function to find company for unknown drugs
+
     def find_company_for_drug(drug_name):
         from openai import OpenAI
-        
+        import json
+
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        
+
         prompt = f"""
         What company or companies make or have rights to the drug "{drug_name}"?
         Please return ONLY a JSON object with this structure:
@@ -38,7 +78,7 @@ def get_companies_from_drugs(interventions):
         }}
         If you don't know, return {{"company": "Unknown", "tickers": []}}
         """
-        
+
         try:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -48,96 +88,48 @@ def get_companies_from_drugs(interventions):
                 ],
                 max_tokens=150
             )
-            
             content = response.choices[0].message.content
-            
-            # Extract JSON
-            import json
             start_idx = content.find('{')
             end_idx = content.rfind('}') + 1
-            
+
             if start_idx >= 0 and end_idx > start_idx:
-                json_str = content[start_idx:end_idx]
-                try:
-                    data = json.loads(json_str)
-                    return data
-                except:
-                    return {"company": "Unknown", "tickers": []}
-            
+                return json.loads(content[start_idx:end_idx])
             return {"company": "Unknown", "tickers": []}
-            
         except Exception as e:
             print(f"Error finding company: {e}")
             return {"company": "Unknown", "tickers": []}
-    
-    # Results container
+
     company_analysis = []
-    
-    # Process each intervention
+
     for intervention in interventions:
         drug_name = intervention.get('name', '').lower()
-        
-        # Skip placebo and other non-drugs
+
         if 'placebo' in drug_name or 'saline' in drug_name:
             continue
-        
-        # Find company info
-        company_info = None
-        
-        # Check known mappings
-        for known_drug, info in company_mappings.items():
-            if known_drug in drug_name:
-                company_info = info
-                break
-        
-        # If not found, use OpenAI to find info
+
+        company_info = next(
+            (info for known_drug, info in company_mappings.items() if known_drug in drug_name),
+            None
+        )
+
         if not company_info and OPENAI_AVAILABLE:
             company_info = find_company_for_drug(drug_name)
-        
+
         if not company_info:
             company_info = {"company": "Unknown", "tickers": []}
-        
-        # Get stock performance for each ticker
-        stock_performance = []
-        for ticker in company_info.get('tickers', []):
-            try:
-                # Get 1-year stock data
-                stock = yf.Ticker(ticker)
-                end_date = datetime.now()
-                start_date = end_date - timedelta(days=365)
-                
-                hist = stock.history(start=start_date.strftime('%Y-%m-%d'), 
-                                     end=end_date.strftime('%Y-%m-%d'))
-                
-                if not hist.empty:
-                    first_price = hist.iloc[0]['Close']
-                    last_price = hist.iloc[-1]['Close']
-                    
-                    percent_change = ((last_price - first_price) / first_price) * 100
-                    
-                    stock_performance.append({
-                        'ticker': ticker,
-                        'price': last_price,
-                        'change_1y': percent_change,
-                        'market_cap': stock.info.get('marketCap', 'Unknown')
-                    })
-            except Exception as e:
-                print(f"Error getting stock data for {ticker}: {e}")
-                stock_performance.append({
-                    'ticker': ticker,
-                    'error': str(e)
-                })
-        
-        # Combine drug and company info
+
+        tickers = company_info.get('tickers', [])
+        stock_performance = lookup_stocks_parallel(tickers) if tickers else []
+
         company_analysis.append({
             'drug': intervention.get('name'),
             'modality': intervention.get('modality'),
             'target': intervention.get('target'),
             'company': company_info.get('company'),
-            'tickers': company_info.get('tickers'),
+            'tickers': tickers,
             'stock_performance': stock_performance
         })
-    
+
     return company_analysis
 
 def analyze_competitive_landscape(processed_trials, company_analysis):

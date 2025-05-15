@@ -17,6 +17,9 @@ logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+## File: visualization.py
+## Location: Replace the create_visualizations function (lines approximately 12-186)
+
 def create_visualizations(processed_trials, enriched_interventions, output_dir="figures"):
     """Create visualizations for the clinical trials data"""
     logger.info(f"Starting visualization generation in {output_dir}")
@@ -25,8 +28,11 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
     plt.style.use('ggplot')
     sns.set(font_scale=1.2)
     
-    # Create output directory if it doesn't exist
+    # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
+    
+    # Verify the matplotlib backend
+    logger.info(f"Using matplotlib backend: {matplotlib.get_backend()}")
     
     visualization_files = []
     
@@ -46,10 +52,15 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
             plt.axis('equal')
             plt.tight_layout()
             file_path = os.path.join(output_dir, 'modality_distribution.png')
-            plt.savefig(file_path, dpi=300)
+            plt.savefig(file_path, dpi=300, bbox_inches='tight')
             plt.close()
-            visualization_files.append(file_path)
-            logger.info(f"Saved {file_path}")
+            
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"Saved {file_path} (size: {file_size} bytes)")
+                visualization_files.append(file_path)
+            else:
+                logger.error(f"Failed to create {file_path}")
         else:
             logger.warning("No modality data available for visualization")
         
@@ -67,6 +78,7 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
                     elif len(start_date) == 7:  # YYYY-MM
                         date_obj = datetime.strptime(start_date, '%Y-%m')
                     else:
+                        logger.warning(f"Skipping invalid date format: {start_date}")
                         continue
                     dates.append(date_obj)
                 except Exception as e:
@@ -81,10 +93,15 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
             plt.ylabel('Number of Trials')
             plt.tight_layout()
             file_path = os.path.join(output_dir, 'trial_timeline.png')
-            plt.savefig(file_path, dpi=300)
+            plt.savefig(file_path, dpi=300, bbox_inches='tight')
             plt.close()
-            visualization_files.append(file_path)
-            logger.info(f"Saved {file_path}")
+            
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"Saved {file_path} (size: {file_size} bytes)")
+                visualization_files.append(file_path)
+            else:
+                logger.error(f"Failed to create {file_path}")
         else:
             logger.warning("No date data available for timeline visualization")
         
@@ -101,10 +118,15 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
             plt.ylabel('Frequency')
             plt.tight_layout()
             file_path = os.path.join(output_dir, 'enrollment_distribution.png')
-            plt.savefig(file_path, dpi=300)
+            plt.savefig(file_path, dpi=300, bbox_inches='tight')
             plt.close()
-            visualization_files.append(file_path)
-            logger.info(f"Saved {file_path}")
+            
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"Saved {file_path} (size: {file_size} bytes)")
+                visualization_files.append(file_path)
+            else:
+                logger.error(f"Failed to create {file_path}")
         else:
             logger.warning("No enrollment data available for visualization")
         
@@ -130,10 +152,15 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
             plt.grid(True)
             plt.tight_layout()
             file_path = os.path.join(output_dir, 'duration_vs_enrollment.png')
-            plt.savefig(file_path, dpi=300)
+            plt.savefig(file_path, dpi=300, bbox_inches='tight')
             plt.close()
-            visualization_files.append(file_path)
-            logger.info(f"Saved {file_path}")
+            
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"Saved {file_path} (size: {file_size} bytes)")
+                visualization_files.append(file_path)
+            else:
+                logger.error(f"Failed to create {file_path}")
         else:
             logger.warning("No duration/enrollment data available for scatter plot")
         
@@ -149,15 +176,28 @@ def create_visualizations(processed_trials, enriched_interventions, output_dir="
             plt.xlabel('Number of Trials')
             plt.tight_layout()
             file_path = os.path.join(output_dir, 'top_sponsors.png')
-            plt.savefig(file_path, dpi=300)
+            plt.savefig(file_path, dpi=300, bbox_inches='tight')
             plt.close()
-            visualization_files.append(file_path)
-            logger.info(f"Saved {file_path}")
+            
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                logger.info(f"Saved {file_path} (size: {file_size} bytes)")
+                visualization_files.append(file_path)
+            else:
+                logger.error(f"Failed to create {file_path}")
         else:
             logger.warning("No sponsor data available for bar chart")
         
     except Exception as e:
-        logger.error(f"Error generating visualizations: {e}")
+        logger.error(f"Error generating visualizations: {e}", exc_info=True)
+    
+    # Verify files were created
+    for expected_file in visualization_files:
+        if os.path.exists(expected_file):
+            file_size = os.path.getsize(expected_file)
+            logger.info(f"Verified file {expected_file} exists (size: {file_size} bytes)")
+        else:
+            logger.error(f"Expected file {expected_file} was not created!")
     
     logger.info(f"Created {len(visualization_files)} visualizations in {output_dir}")
     return visualization_files
