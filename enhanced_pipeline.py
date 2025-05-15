@@ -10,6 +10,11 @@ This script performs the pipeline functions with OpenAI enhancement:
 """
 import os
 import sys
+
+# Load environment variables at the very beginning
+from dotenv import load_dotenv
+load_dotenv()
+
 import json
 import time
 from datetime import datetime, timedelta
@@ -115,6 +120,9 @@ except ImportError:
     print("OpenAI enrichment will be skipped")
     OPENAI_AVAILABLE = False
 
+## File: enhanced_pipeline.py
+## Location: Update the parse_arguments function
+
 def parse_arguments():
     """Parse command line arguments for the pipeline"""
     import argparse
@@ -125,7 +133,7 @@ def parse_arguments():
                        help='Disease or condition to search for')
     
     parser.add_argument('--max-trials', type=int, default=100,
-                       help='Maximum number of trials to process')
+                       help='Maximum number of trials to process (0 for unlimited)')
     
     parser.add_argument('--years-back', type=int, default=15,
                        help='Number of years back to search for trials')
@@ -135,6 +143,9 @@ def parse_arguments():
     
     parser.add_argument('--skip-openai', action='store_true',
                        help='Skip OpenAI enrichment (uses pattern-based only)')
+    
+    parser.add_argument('--skip-financial', action='store_true',
+                       help='Skip financial analysis (faster processing)')
     
     parser.add_argument('--output-dir', type=str, default='.',
                        help='Directory to store output files')
@@ -288,9 +299,10 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
             all_studies.extend(filtered_page_studies)
             
             # Apply max_results limit if specified
-            if max_results and len(all_studies) >= max_results:
+            if max_results and max_results > 0 and len(all_studies) > max_results:
                 all_studies = all_studies[:max_results]
-                break
+            print(f"Total studies after all pages and filtering: {len(all_studies)}")
+
             
             # Avoid overloading the API
             time.sleep(0.5)
@@ -1045,8 +1057,11 @@ def main():
     years_back = args.years_back
     industry_sponsored = args.industry_only
     use_openai = not args.skip_openai
+    skip_financial = args.skip_financial
     
     print(f"\n===== Starting Enhanced Clinical Trials Pipeline for {disease} =====\n")
+    print(f"Max trials: {'Unlimited' if max_trials == 0 else max_trials}")
+    print(f"Financial analysis: {'Skipped' if skip_financial else 'Enabled'}")
     
     start_time = time.time()
     
@@ -1098,19 +1113,24 @@ def main():
 
     # Step 7: Financial/biotech specific analysis
     start = time.time()
-    company_analysis = get_companies_from_drugs(enriched_interventions)
-    print(f"[TIMER] Company analysis took {time.time() - start:.2f}s")
+    if skip_financial:
+        print("Skipping financial analysis...")
+        company_analysis = get_companies_from_drugs(enriched_interventions, skip_financial=True)
+        competitive_landscape = []
+        threshold_analysis = {"skipped": True}
+    else:
+        company_analysis = get_companies_from_drugs(enriched_interventions)
+        print(f"[TIMER] Company analysis took {time.time() - start:.2f}s")
 
-    # Step 8: Competitive landscape analysis
-    start = time.time()
-    competitive_landscape = analyze_competitive_landscape(processed_trials, company_analysis)
-    print(f"[TIMER] Competitive landscape analysis took {time.time() - start:.2f}s")
-
-    
-    # Step 9: Threshold analysis
-    start = time.time()
-    threshold_analysis = analyze_clinical_thresholds(processed_trials, disease)
-    print(f"[TIMER] Threshold analysis took {time.time() - start:.2f}s")
+        # Step 8: Competitive landscape analysis
+        start = time.time()
+        competitive_landscape = analyze_competitive_landscape(processed_trials, company_analysis)
+        print(f"[TIMER] Competitive landscape analysis took {time.time() - start:.2f}s")
+        
+        # Step 9: Threshold analysis
+        start = time.time()
+        threshold_analysis = analyze_clinical_thresholds(processed_trials, disease)
+        print(f"[TIMER] Threshold analysis took {time.time() - start:.2f}s")
 
     # Step 10: Save data to CSV
     save_to_csv(

@@ -6,6 +6,10 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
 from cloud_storage import upload_pipeline_outputs, download_pipeline_outputs, get_file_url
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'results'
 
@@ -18,25 +22,34 @@ def index():
 
 @app.route('/run_analysis', methods=['POST'])
 def run_analysis():
+    """Run the analysis pipeline with user parameters"""
+    # Generate a unique run ID
     run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+    
+    # Get parameters
     disease = request.form.get('disease', 'Familial Hypercholesterolemia')
     max_trials = request.form.get('max_trials', '50')
     years_back = request.form.get('years_back', '15')
     industry_only = 'industry_only' in request.form
-
+    financial_analysis = 'financial_analysis' in request.form
+    
+    # Store run parameters
     runs[run_id] = {
         'disease': disease,
         'max_trials': max_trials,
         'years_back': years_back,
         'industry_only': industry_only,
+        'financial_analysis': financial_analysis,
         'status': 'running',
         'start_time': datetime.now().isoformat(),
         'files': {}
     }
-
+    
+    # Ensure output directories exist
     for directory in ['data', 'results', 'figures']:
         os.makedirs(directory, exist_ok=True)
-
+    
+    # Run the pipeline script
     cmd = [
         'python', 'enhanced_pipeline.py',
         '--disease', disease,
@@ -44,13 +57,18 @@ def run_analysis():
         '--years-back', years_back,
         '--run-id', run_id
     ]
-
+    
     if industry_only:
         cmd.append('--industry-only')
-
+    
+    if not financial_analysis:
+        cmd.append('--skip-financial')
+    
+    # Run the pipeline
     try:
         print(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
+
 
         if result.returncode != 0:
             print(f"Pipeline execution failed: {result.stderr}")
@@ -63,21 +81,50 @@ def run_analysis():
                 os.path.exists(d) and os.listdir(d) for d in ['data', 'results', 'figures']
             )
 
-            if not files_exist:
-                runs[run_id]['status'] = 'error'
-                runs[run_id]['error'] = "Pipeline ran successfully but did not generate output files"
-                return redirect(url_for('results', run_id=run_id))
+            ## File: app.py
+            ## Location: Modify the portion of run_analysis that handles cloud storage
 
-            try:
-                file_urls = upload_pipeline_outputs(run_id)
+            # After running the pipeline successfully and checking if files exist
+        if not files_exist:
+            runs[run_id]['status'] = 'error'
+            runs[run_id]['error'] = "Pipeline ran successfully but did not generate output files"
+            return redirect(url_for('results', run_id=run_id))
+    
+        # Try to upload to cloud storage but make it optional
+        try:
+            from cloud_storage import upload_pipeline_outputs
+            file_urls = upload_pipeline_outputs(run_id)
+            
+            if file_urls:
+                print(f"Successfully uploaded {len(file_urls)} files to cloud storage")
                 runs[run_id]['status'] = 'completed'
                 runs[run_id]['files'] = file_urls
-                runs[run_id]['end_time'] = datetime.now().isoformat()
-            except Exception as e:
-                print(f"Error uploading files to cloud storage: {e}")
+            else:
+                print("Cloud storage upload failed or was skipped")
+                # Still mark as completed, just note storage was skipped
                 runs[run_id]['status'] = 'completed'
-                runs[run_id]['storage_error'] = str(e)
-                runs[run_id]['end_time'] = datetime.now().isoformat()
+                runs[run_id]['storage_skipped'] = True
+                
+                # Create local file URLs as fallback
+                local_urls = {}
+                for directory in ['data', 'results', 'figures']:
+                    if os.path.exists(directory):
+                        for filename in os.listdir(directory):
+                            file_path = os.path.join(directory, filename)
+                            if os.path.isfile(file_path):
+                                local_urls[f"{directory}/{filename}"] = f"/{directory}/{filename}"
+                
+                runs[run_id]['files'] = local_urls
+                print(f"Created {len(local_urls)} local file URLs")
+                
+            runs[run_id]['end_time'] = datetime.now().isoformat()
+
+        except Exception as e:
+            print(f"Error with cloud storage: {e}")
+            # Still mark as completed, but note the storage error
+            runs[run_id]['status'] = 'completed'
+            runs[run_id]['storage_error'] = str(e)
+            runs[run_id]['end_time'] = datetime.now().isoformat()
 
     except Exception as e:
         print(f"Error running pipeline: {e}")
@@ -134,15 +181,35 @@ def results(run_id):
         visualizations = []
         viz_source = None
 
+        # Try cloud storage first
         if 'files' in run_info and run_info['files']:
             print(f"Checking cloud storage for visualizations")
+            viz_count = 0
+            
             for file_path, url in run_info['files'].items():
+                # Check if it's a visualization file
                 if 'figures/' in file_path and file_path.endswith('.png'):
+                    # Extract filename without path
                     filename = os.path.basename(file_path)
                     name = filename.replace('.png', '').replace('_', ' ').title()
-                    visualizations.append({'name': name, 'url': url})
-                    print(f"Found cloud visualization: {name} -> {url}")
-            viz_source = "cloud" if visualizations else "none"
+                    
+                    # For local URLs, make sure they're properly formatted
+                    if url.startswith('/'):
+                        url = url_for('figures', filename=filename)
+                        
+                    visualizations.append({
+                        'name': name,
+                        'url': url
+                    })
+                    viz_count += 1
+                    print(f"Found visualization: {name} -> {url}")
+            
+            if viz_count > 0:
+                print(f"Found {viz_count} visualizations from stored URLs")
+                viz_source = "urls"
+            else:
+                print("No visualizations found in stored URLs")
+                viz_source = "cloud" if visualizations else "none"
 
         if not visualizations:
             print("Checking local directory for visualizations")

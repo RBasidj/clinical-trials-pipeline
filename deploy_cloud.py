@@ -29,7 +29,9 @@ def deploy_to_cloud_run():
         "--allow-unauthenticated",
         "--memory", "2Gi",
         "--timeout", "30m",
-        "--set-env-vars", f"OPENAI_API_KEY={os.environ.get('OPENAI_API_KEY', '')}"
+        "--set-env-vars", f"OPENAI_API_KEY={os.environ.get('OPENAI_API_KEY', '')}",
+        "--set-env-vars", f"CLOUD_STORAGE_BUCKET={PROJECT_ID}-clinical-trials",
+        "--service-account", f"clinical-trials-sa@{PROJECT_ID}.iam.gserviceaccount.com"
     ]
     
     # Execute commands

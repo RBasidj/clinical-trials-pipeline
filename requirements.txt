@@ -8,3 +8,4 @@ yfinance>=0.2.61
 flask>=2.2.0
 google-cloud-storage>=2.0.0
 gunicorn>=20.0.0
+flask>=3.1.1
