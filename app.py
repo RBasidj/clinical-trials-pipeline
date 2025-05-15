@@ -2,9 +2,11 @@ import os
 import json
 import subprocess
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
 from cloud_storage import upload_pipeline_outputs, download_pipeline_outputs, get_file_url
+import requests
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,8 +15,11 @@ load_dotenv()
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'results'
 
-# Store run information in memory
+# run info is stored
 runs = {}
+
+# cloud url cache
+cloud_url_cache = {}
 
 @app.route('/')
 def index():
@@ -26,14 +31,14 @@ def run_analysis():
     # Generate a unique run ID
     run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
     
-    # Get parameters
+    # grab params
     disease = request.form.get('disease', 'Familial Hypercholesterolemia')
     max_trials = request.form.get('max_trials', '50')
     years_back = request.form.get('years_back', '15')
     industry_only = 'industry_only' in request.form
     financial_analysis = 'financial_analysis' in request.form
     
-    # Store run parameters
+    # run params
     runs[run_id] = {
         'disease': disease,
         'max_trials': max_trials,
@@ -45,11 +50,10 @@ def run_analysis():
         'files': {}
     }
     
-    # Ensure output directories exist
     for directory in ['data', 'results', 'figures']:
         os.makedirs(directory, exist_ok=True)
     
-    # Run the pipeline script
+    # begin pipeline here
     cmd = [
         'python', 'enhanced_pipeline.py',
         '--disease', disease,
@@ -64,12 +68,12 @@ def run_analysis():
     if not financial_analysis:
         cmd.append('--skip-financial')
     
-        # Run the pipeline
+        # running pipeline
     try:
         print(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
         
-        # Initialize files_exist variable before using it
+        # init files_exist variable before using it
         files_exist = False
         
         if result.returncode != 0:
@@ -79,7 +83,6 @@ def run_analysis():
         else:
             print(f"Pipeline executed successfully: {result.stdout}")
             
-            # Check if output files exist
             files_exist = False
             for directory in ['data', 'results', 'figures']:
                 if os.path.exists(directory) and os.listdir(directory):
@@ -91,7 +94,7 @@ def run_analysis():
                 runs[run_id]['error'] = "Pipeline ran successfully but did not generate output files"
                 return redirect(url_for('results', run_id=run_id))
                 
-            # Upload files to cloud storage
+            # cloud storage upload with multiple failsafes
 
         try:
             from cloud_storage import upload_pipeline_outputs
@@ -107,7 +110,7 @@ def run_analysis():
                 runs[run_id]['status'] = 'completed'
                 runs[run_id]['storage_skipped'] = True
                 
-                # Create local file URLs as fallback
+                # local file url fallback
                 local_urls = {}
                 for directory in ['data', 'results', 'figures']:
                     if os.path.exists(directory):
@@ -123,7 +126,7 @@ def run_analysis():
 
         except Exception as e:
             print(f"Error with cloud storage: {e}")
-            # Still mark as completed, but note the storage error
+            # note storage errors
             runs[run_id]['status'] = 'completed'
             runs[run_id]['storage_error'] = str(e)
             runs[run_id]['end_time'] = datetime.now().isoformat()
@@ -183,19 +186,19 @@ def results(run_id):
         visualizations = []
         viz_source = None
 
-        # Try cloud storage first
+        # trying cloud
         if 'files' in run_info and run_info['files']:
             print(f"Checking cloud storage for visualizations")
             viz_count = 0
             
             for file_path, url in run_info['files'].items():
-                # Check if it's a visualization file
+                # checking if it is viz file
                 if 'figures/' in file_path and file_path.endswith('.png'):
-                    # Extract filename without path
+                    # extract filename
                     filename = os.path.basename(file_path)
                     name = filename.replace('.png', '').replace('_', ' ').title()
                     
-                    # For local URLs, make sure they're properly formatted
+                    # format local url
                     if url.startswith('/'):
                         url = url_for('figures', filename=filename)
                         
@@ -280,6 +283,101 @@ def files(filename):
 def figures(filename):
     return send_from_directory('figures', filename)
 
+## File: app.py
+## Location: Replace your existing cloud_file function completely
+
+@app.route('/cloud_file/<run_id>/<path:file_path>')
+def cloud_file(run_id, file_path):
+    """Redirect to a cloud storage file URL or serve from local if needed"""
+    try:
+        # First try to get from cloud storage
+        file_url = get_file_url(run_id, file_path)
+        
+        if file_url:
+            # Log successful access
+            print(f"Successfully retrieved cloud URL for {run_id}/{file_path}: {file_url[:60]}...")
+            return redirect(file_url)
+        
+        # If cloud storage fails, try to serve the local file as fallback
+        local_path = os.path.join(file_path)
+        if os.path.exists(local_path):
+            print(f"Cloud storage access failed, serving local file: {local_path}")
+            directory = os.path.dirname(local_path)
+            filename = os.path.basename(local_path)
+            return send_from_directory(directory, filename)
+        
+        # Both cloud and local failed
+        error_msg = f"File not found in cloud storage or locally: {file_path}"
+        print(error_msg)
+        return render_template('error.html',
+                              error=error_msg,
+                              run_id=run_id,
+                              run_info={"disease": "Unknown"})
+    except Exception as e:
+        error_msg = f"Error accessing file {file_path}: {str(e)}"
+        print(error_msg)
+        return render_template('error.html',
+                              error=error_msg,
+                              run_id=run_id,
+                              run_info={"disease": "Unknown"})
+
+@app.route('/diagnose/<run_id>')
+def diagnose(run_id):
+    """Diagnose storage and file access issues"""
+    from cloud_storage import list_run_files
+    
+    try:
+        # Get cloud files
+        cloud_files = list_run_files(run_id)
+        
+        # Get local files
+        local_files = {}
+        for directory in ['data', 'results', 'figures']:
+            if os.path.exists(directory):
+                local_files[directory] = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+            else:
+                local_files[directory] = []
+        
+        # Environment info
+        env_info = {
+            "PROJECT_ID": os.environ.get("GOOGLE_CLOUD_PROJECT", "Unknown"),
+            "BUCKET_NAME": os.environ.get("CLOUD_STORAGE_BUCKET", "clinicaltrialsv1"),
+            "SERVICE_ACCOUNT": os.environ.get("GOOGLE_SERVICE_ACCOUNT", "Unknown"),
+            "CREDENTIALS_PATH": os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "Not set"),
+            "CREDENTIALS_EXISTS": os.path.exists(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")) if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") else False,
+            "PLATFORM": os.environ.get("PLATFORM", "Unknown")
+        }
+        
+        # Test a direct cloud storage operation
+        from google.cloud import storage
+        try:
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(env_info["BUCKET_NAME"])
+            bucket_exists = bucket.exists()
+            test_blob = bucket.blob(f"test_file_{run_id}.txt") if bucket_exists else None
+            upload_success = False
+            
+            if test_blob:
+                test_content = f"Test file created at {datetime.now().isoformat()}"
+                test_blob.upload_from_string(test_content)
+                upload_success = test_blob.exists()
+        except Exception as e:
+            bucket_exists = f"Error: {str(e)}"
+            upload_success = False
+        
+        return render_template('diagnosis.html',
+                             run_id=run_id,
+                             cloud_files=cloud_files,
+                             local_files=local_files,
+                             env_info=env_info,
+                             bucket_exists=bucket_exists,
+                             upload_success=upload_success)
+    except Exception as e:
+        return render_template('error.html',
+                             error=f"Diagnosis error: {str(e)}",
+                             run_id=run_id,
+                             run_info={"disease": "Unknown"})
+                             
 if __name__ == '__main__':
     for directory in ['results', 'figures', 'data']:
         os.makedirs(directory, exist_ok=True)

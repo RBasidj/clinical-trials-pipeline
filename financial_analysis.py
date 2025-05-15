@@ -315,11 +315,18 @@ def get_companies_from_drugs(interventions, skip_financial=False):
     
     return company_analysis
 
+## File: financial_analysis.py
+## Location: In the analyze_competitive_landscape function, where key_outcome is determined
+
+## File: financial_analysis.py
+## Location: Inside the analyze_competitive_landscape function, update the key outcome extraction
+
 def analyze_competitive_landscape(processed_trials, company_analysis):
     """
     Analyze competitive positioning of different drugs and companies
     """
     from collections import defaultdict
+    import pandas as pd
     
     # Group trials by target
     target_groups = defaultdict(list)
@@ -363,12 +370,69 @@ def analyze_competitive_landscape(processed_trials, company_analysis):
             for trial in drug_trials:
                 primary_outcomes.extend(trial.get('primary_outcomes', []))
             
-            # Find effectiveness metrics (looking for LDL reduction, etc.)
+            # Enhanced effectiveness metrics extraction
             effectiveness = "No data"
-            for outcome in primary_outcomes:
-                if isinstance(outcome, str) and ('ldl' in outcome.lower() or 'cholesterol' in outcome.lower()):
-                    effectiveness = outcome
-                    break
+            
+            # Define better keywords based on drug/target type
+            # This covers more therapeutic areas and outcome measures
+            outcome_keywords = [
+                'reduction', 'decrease', 'improvement', 'relief', 'healing', 'eradication',
+                'resolution', 'response', 'efficacy', 'safety', 'symptom', 'acid', 'ph',
+                'gerd', 'heartburn', 'reflux', 'erosive', 'esophagitis', 'ulcer',
+                'ldl', 'cholesterol', 'lipid', 'biomarker', 'glucose', 'hba1c',
+                'pain', 'score', 'scale', 'assessment', 'endpoint'
+            ]
+            
+            # First check all primary outcomes
+            if primary_outcomes:
+                # Try to find the best match using keywords
+                for outcome in primary_outcomes:
+                    if outcome:  # Ensure outcome isn't None
+                        outcome_lower = outcome.lower()
+                        if any(keyword in outcome_lower for keyword in outcome_keywords):
+                            effectiveness = outcome
+                            break
+                
+                # If no good match but we have outcomes, use the first one
+                if effectiveness == "No data" and primary_outcomes and primary_outcomes[0]:
+                    effectiveness = primary_outcomes[0]
+            
+            # Add fallback to secondary outcomes if needed
+            if effectiveness == "No data" and drug_trials:
+                secondary_outcomes = []
+                for trial in drug_trials:
+                    secondary_outcomes.extend([o for o in trial.get('secondary_outcomes', []) if o])
+                
+                for outcome in secondary_outcomes:
+                    outcome_lower = outcome.lower()
+                    if any(keyword in outcome_lower for keyword in outcome_keywords):
+                        effectiveness = f"Secondary: {outcome}"
+                        break
+                
+                # If still no data but we have secondary outcomes, use the first
+                if effectiveness == "No data" and secondary_outcomes:
+                    effectiveness = f"Secondary: {secondary_outcomes[0]}"
+            
+            # Final fallback to trial phase or status
+            if effectiveness == "No data" and drug_trials:
+                # For PPI drugs, use a standard outcome
+                if "proton pump" in target.lower() or any(ppi in drug_name.lower() for ppi in ["prazole", "nexium", "prilosec", "prevacid", "zegerid"]):
+                    effectiveness = "Acid suppression efficacy"
+                # Try phase information
+                else:
+                    for trial in drug_trials:
+                        phase = trial.get('phase')
+                        if phase and phase != "Not Available":
+                            effectiveness = f"Phase {phase} trial"
+                            break
+                    
+                    # Try status if phase didn't work
+                    if effectiveness == "No data":
+                        for trial in drug_trials:
+                            status = trial.get('status')
+                            if status:
+                                effectiveness = f"Status: {status}"
+                                break
             
             # Add to comparative analysis
             competition['comparative_data'].append({

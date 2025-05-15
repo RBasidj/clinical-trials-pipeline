@@ -3,13 +3,13 @@ from collections import Counter
 def generate_qualitative_insights(processed_trials, enriched_interventions):
     """Generate deeper qualitative insights about trends"""
     
-    # Sort trials by start date
+    #  trials by start date
     sorted_trials = sorted(
         [t for t in processed_trials if t.get('start_date')],
         key=lambda x: x.get('start_date', '2000-01-01')
     )
     
-    # For time-based analysis, divide into periods
+    #  time-based analysis are divided into periods
     if len(sorted_trials) > 5:
         early_period = sorted_trials[:len(sorted_trials)//2]
         late_period = sorted_trials[len(sorted_trials)//2:]
@@ -17,12 +17,12 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
         early_period = sorted_trials
         late_period = sorted_trials
     
-    # 1. Trends in modality over time
+    # 1. modality trends over time
     modality_insights = []
     early_modalities = []
     late_modalities = []
     
-    # Extract modalities by period
+    #  modalities by period extracted here
     for trial in early_period:
         for intervention in trial.get('interventions', []):
             int_name = intervention.get('name')
@@ -41,7 +41,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
                         late_modalities.append(enriched.get('modality', 'unknown'))
                         break
     
-    # Analyze changes in modality distribution
+    #  changes in modality distribution are analyzed
     early_counter = Counter(early_modalities)
     late_counter = Counter(late_modalities)
     
@@ -66,11 +66,11 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
     for trial in late_period:
         late_primary.extend(trial.get('primary_outcomes', []))
     
-    # Look for shifts in outcome measures focus
+    #  shifts in outcome measures focus are checked
     early_outcomes = Counter([o.lower() for o in early_primary if o])
     late_outcomes = Counter([o.lower() for o in late_primary if o])
     
-    # Check for biomarker shifts vs clinical outcomes
+    # biomarker shifts vs clinical outcomes (market-relevant)
     biomarker_terms = ['ldl', 'cholesterol', 'lipid', 'marker', 'level']
     clinical_terms = ['event', 'mortality', 'death', 'survival', 'hospitalization', 'cardiovascular']
     
@@ -94,10 +94,10 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
     elif early_clinical > late_clinical:
         outcome_insights.append("There is a decreasing focus on clinical outcomes over time.")
     
-    # 3. Trends in trial design
+    # 3.  trial design trends
     design_insights = []
     
-    # Analyze enrollment changes
+    #  enrollment changes
     early_enrollment = [int(t.get('enrollment')) for t in early_period 
                        if t.get('enrollment') and str(t.get('enrollment')).isdigit()]
     late_enrollment = [int(t.get('enrollment')) for t in late_period 
@@ -112,7 +112,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
         elif early_avg > late_avg:
             design_insights.append(f"Average trial enrollment has decreased over time from {early_avg:.1f} to {late_avg:.1f} participants.")
     
-    # Analyze duration changes
+    #  duration changes
     early_duration = [int(t.get('duration_days')) for t in early_period 
                      if t.get('duration_days') and str(t.get('duration_days')).isdigit()]
     late_duration = [int(t.get('duration_days')) for t in late_period 

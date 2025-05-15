@@ -10,7 +10,7 @@ __pycache__/
 cache/
 .pytest_cache/
 
-# Output directories (optional - ignore if you don't want these tracked)
+# Output directories
 data/
 results/
 figures/

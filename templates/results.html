@@ -18,34 +18,17 @@
             
             <!-- Download links using cloud URLs -->
             {% if file_urls and file_urls.items()|length > 0 %}
-                {% if 'results/report.md' in file_urls %}
-                    <a href="{{ file_urls['results/report.md'] }}" class="btn btn-outline-success" target="_blank">View Full Report</a>
-                {% elif 'results/report.md' in file_urls.keys() %}
-                    <a href="{{ file_urls['results/report.md'] }}" class="btn btn-outline-success" target="_blank">View Full Report</a>
-                {% endif %}
-                
-                {% if 'results/summary.json' in file_urls %}
-                    <a href="{{ file_urls['results/summary.json'] }}" class="btn btn-outline-secondary" target="_blank">Download JSON Data</a>
-                {% elif 'results/summary.json' in file_urls.keys() %}
-                    <a href="{{ file_urls['results/summary.json'] }}" class="btn btn-outline-secondary" target="_blank">Download JSON Data</a>
-                {% endif %}
-                
-                {% if 'data/clinical_trials.csv' in file_urls %}
-                    <a href="{{ file_urls['data/clinical_trials.csv'] }}" class="btn btn-outline-info" target="_blank">Download Trials CSV</a>
-                {% elif 'data/clinical_trials.csv' in file_urls.keys() %}
-                    <a href="{{ file_urls['data/clinical_trials.csv'] }}" class="btn btn-outline-info" target="_blank">Download Trials CSV</a>
-                {% endif %}
-                
-                {% if 'data/interventions.csv' in file_urls %}
-                    <a href="{{ file_urls['data/interventions.csv'] }}" class="btn btn-outline-info" target="_blank">Download Interventions CSV</a>
-                {% elif 'data/interventions.csv' in file_urls.keys() %}
-                    <a href="{{ file_urls['data/interventions.csv'] }}" class="btn btn-outline-info" target="_blank">Download Interventions CSV</a>
-                {% endif %}
+                <a href="{{ url_for('cloud_file', run_id=run_id, file_path='results/report.md') }}" class="btn btn-outline-success" target="_blank">View Full Report</a>
+                <a href="{{ url_for('cloud_file', run_id=run_id, file_path='results/summary.json') }}" class="btn btn-outline-secondary" target="_blank">Download JSON Data</a>
+                <a href="{{ url_for('cloud_file', run_id=run_id, file_path='data/clinical_trials.csv') }}" class="btn btn-outline-info" target="_blank">Download Trials CSV</a>
+                <a href="{{ url_for('cloud_file', run_id=run_id, file_path='data/interventions.csv') }}" class="btn btn-outline-info" target="_blank">Download Interventions CSV</a>
             {% else %}
                 <div class="alert alert-warning">
                     No downloadable files are available. Files might not have been properly uploaded to cloud storage.
                 </div>
             {% endif %}
+
+
         </div>
         
         <div class="row mb-4">
@@ -103,8 +86,8 @@
                             <h5 class="mb-0">{{ viz.name }}</h5>
                         </div>
                         <div class="card-body">
-                            <img src="{{ viz.url }}" alt="{{ viz.name }}" class="img-fluid">
-                        </div>
+                            <img src="{{ url_for('cloud_file', run_id=run_id, file_path='figures/' + viz.name|lower|replace(' ', '_') + '.png') }}" alt="{{ viz.name }}" class="img-fluid">
+                        </div>                        
                     </div>
                 </div>
                 {% endfor %}

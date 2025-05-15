@@ -15,100 +15,67 @@ logger = logging.getLogger(__name__)
 BUCKET_NAME = os.environ.get("CLOUD_STORAGE_BUCKET", "clinicaltrialsv1")
 LOCAL_OUTPUT_DIRS = ["data", "results", "figures"]
 
-## File: cloud_storage.py
-## Location: Replace the initialize_storage function completely
-
 def initialize_storage():
-    """Initialize and return a Google Cloud Storage client with explicit credentials"""
+    """Initialize Google Cloud Storage client with better error handling and logging"""
     try:
         logger.info(f"Initializing Google Cloud Storage with bucket: {BUCKET_NAME}")
         
-        # Check for service account credentials file
-        credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-        logger.info(f"Looking for credentials at: {credentials_path}")
+        # Look for credentials file in various locations
+        cred_locations = [
+            os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
+            "clinicaltrials-v1-9acf57d456a4.json",  # Current directory
+            os.path.join(os.path.expanduser("~"), ".config/gcp", "clinicaltrials-v1-9acf57d456a4.json"),
+            "/app/clinicaltrials-v1-9acf57d456a4.json"  # For Cloud Run
+        ]
         
-        # Convert relative path to absolute if needed
-        if credentials_path and not os.path.isabs(credentials_path):
-            abs_path = os.path.abspath(credentials_path)
-            logger.info(f"Converting relative path to absolute: {abs_path}")
-            credentials_path = abs_path
-            # Update environment variable
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = abs_path
+        # Try to find and load credentials
+        creds_path = None
+        for loc in cred_locations:
+            if loc and os.path.exists(loc):
+                creds_path = loc
+                logger.info(f"Looking for credentials at: {creds_path}")
+                logger.info(f"Loading credentials from {creds_path}")
+                break
         
-        # Try multiple approaches to find credentials
-        credentials = None
-        project_id = None
-        
-        # Method 1: Try explicit path from environment variable
-        if credentials_path and os.path.exists(credentials_path):
-            try:
-                from google.oauth2 import service_account
-                logger.info(f"Loading credentials from {credentials_path}")
-                credentials = service_account.Credentials.from_service_account_file(credentials_path)
-                project_id = credentials.project_id
-                logger.info(f"Loaded credentials for project: {project_id}")
-            except Exception as e:
-                logger.error(f"Failed to load credentials from {credentials_path}: {e}")
-
-        
-        # Method 2: Try servicekey.json in current directory
-        if credentials is None:
-            try:
-                from google.oauth2 import service_account
-                local_key = os.path.join(os.getcwd(), 'servicekey.json')
-                if os.path.exists(local_key):
-                    logger.info(f"Loading credentials from {local_key}")
-                    credentials = service_account.Credentials.from_service_account_file(local_key)
-                    project_id = credentials.project_id
-                    logger.info(f"Loaded credentials for project: {project_id}")
-            except Exception as e:
-                logger.error(f"Failed to load credentials from local servicekey.json: {e}")
-        
-        # Initialize storage client
-        if credentials and project_id:
+        if creds_path:
+            # Use explicit credentials
+            from google.oauth2 import service_account
+            credentials = service_account.Credentials.from_service_account_file(creds_path)
+            project_id = credentials.project_id
+            logger.info(f"Loaded credentials for project: {project_id}")
             logger.info(f"Creating storage client with explicit credentials for project {project_id}")
-            storage_client = storage.Client(project=project_id, credentials=credentials)
+            storage_client = storage.Client(credentials=credentials, project=project_id)
         else:
-            # Last resort: try default credentials
-            logger.warning("Falling back to default credentials (likely to fail in local development)")
+            # Fall back to default credentials
+            logger.info("No explicit credentials found, using default credentials")
             storage_client = storage.Client()
         
-        # Check if our bucket exists
         logger.info(f"Checking if bucket {BUCKET_NAME} exists")
         bucket = storage_client.bucket(BUCKET_NAME)
         
         if not bucket.exists():
             logger.warning(f"Bucket {BUCKET_NAME} doesn't exist, attempting to create it")
-            try:
-                bucket = storage_client.create_bucket(BUCKET_NAME)
-                logger.info(f"Created new bucket: {BUCKET_NAME}")
-            except Exception as e:
-                logger.error(f"Failed to create bucket: {e}")
-                return None, None
+            bucket = storage_client.create_bucket(BUCKET_NAME)
+            logger.info(f"Created new bucket: {BUCKET_NAME}")
+            
+            # Make bucket public (optional)
+            bucket.make_public(future=True)
+            logger.info(f"Made bucket {BUCKET_NAME} publicly readable")
         else:
             logger.info(f"Using existing bucket: {BUCKET_NAME}")
-        
-        # Check bucket permissions
+            
+        # Verify permissions by doing a simple operation
         try:
-            # Try to list blobs to verify access
-            list(bucket.list_blobs(max_results=1))
+            blobs = list(bucket.list_blobs(max_results=1))
             logger.info("Successfully verified bucket access")
         except Exception as e:
-            logger.error(f"Cannot access bucket: {e}")
-            logger.error("Service account may not have sufficient permissions")
-            return None, None
-            
+            logger.warning(f"Permission verification warning: {e}")
+        
         return storage_client, bucket
     except Exception as e:
         logger.error(f"Error initializing cloud storage: {e}", exc_info=True)
         return None, None
 
-
-## File: cloud_storage.py
-## Location: Replace the upload_pipeline_outputs function completely
-
-## File: cloud_storage.py
-## Location: Replace upload_pipeline_outputs function
 
 def upload_pipeline_outputs(run_id):
     """Upload all pipeline outputs to cloud storage with a specific run ID"""
@@ -230,35 +197,59 @@ def download_pipeline_outputs(run_id, local_dir="downloads"):
 ## File: cloud_storage.py
 ## Location: Replace get_file_url function
 
+## File: cloud_storage.py
+## Location: Update the get_file_url function
+
+## File: cloud_storage.py
+## Location: Update the get_file_url function
+
 def get_file_url(run_id, local_path):
-    """Get the URL for a specific file"""
+    """Generate a signed URL for accessing a specific file with better error handling"""
     try:
         storage_client, bucket = initialize_storage()
         if not bucket:
+            logger.error(f"Failed to initialize storage bucket for {run_id}/{local_path}")
             return None
 
-        cloud_path = f"{run_id}/{local_path}"
-        blob = bucket.blob(cloud_path)
+        # Try various path formats
+        path_formats = [
+            f"{run_id}/{local_path}",          # Standard path
+            f"{run_id}/{local_path.lstrip('/')}", # Remove leading slash if present
+            local_path,                        # Direct path without run_id
+            f"{run_id}/{os.path.basename(local_path)}"  # Just the filename with run_id
+        ]
+        
+        # Try each path format
+        for cloud_path in path_formats:
+            logger.info(f"Trying path: {cloud_path}")
+            blob = bucket.blob(cloud_path)
+            
+            if blob.exists():
+                logger.info(f"Found blob at path: {cloud_path}")
+                try:
+                    url = blob.generate_signed_url(
+                        expiration=datetime.timedelta(days=7),
+                        method="GET"
+                    )
+                    logger.info(f"Generated signed URL for {cloud_path} valid for 7 days")
+                    return url
+                except Exception as url_error:
+                    logger.warning(f"Could not generate signed URL: {url_error}")
+                    
+                    # Try public URL as fallback
+                    try:
+                        blob.make_public()
+                        logger.info(f"Made blob {cloud_path} public")
+                        return blob.public_url
+                    except Exception as public_error:
+                        logger.warning(f"Could not make blob public: {public_error}")
+                        pass
 
-        if not blob.exists():
-            logger.warning(f"Blob does not exist: {cloud_path}")
-            return None
-
-        try:
-            # Try to use public URL first
-            public_url = f"https://storage.googleapis.com/{bucket.name}/{blob.name}"
-            return public_url
-        except Exception as e:
-            logger.warning(f"Could not create public URL, using signed URL: {e}")
-            # Fall back to signed URL with long expiration if necessary
-            signed_url = blob.generate_signed_url(
-                version="v4",
-                expiration=datetime.timedelta(days=7),
-                method="GET"
-            )
-            return signed_url
+        # If we reach here, the file wasn't found in any of the tried paths
+        logger.error(f"File not found in cloud storage: tried {path_formats}")
+        return None
     except Exception as e:
-        logger.error(f"Error getting file URL: {e}", exc_info=True)
+        logger.error(f"Error getting file URL for {run_id}/{local_path}: {e}", exc_info=True)
         return None
 
 def list_run_files(run_id):

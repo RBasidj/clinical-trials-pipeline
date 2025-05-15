@@ -149,7 +149,7 @@
             }
         }
         
-        // Refresh status from API and simulate progress
+        // refresh API status
         function checkStatus() {
             fetch('/api/status/{{ run_id }}')
                 .then(response => response.json())
@@ -158,12 +158,12 @@
                         window.location.href = '/results/{{ run_id }}';
                     }
                     
-                    // Format start time
+                    // formatting the start-time
                     if (data.start_time) {
                         const startTime = new Date(data.start_time);
                         document.getElementById('start-time').textContent = startTime.toLocaleString();
                         
-                        // Calculate running time
+                        // calculate the runtime
                         const now = new Date();
                         const diffMs = now - startTime;
                         const diffMins = Math.floor(diffMs / 60000);
@@ -172,17 +172,16 @@
                             `${diffMins} minutes, ${diffSecs} seconds`;
                     }
                     
-                    // Update progress
+                    // progress updates
                     updateProgress();
                 })
                 .catch(error => {
                     console.error('Error checking status:', error);
-                    // Still update progress on error
+                    // progress updates on errors
                     updateProgress();
                 });
         }
         
-        // Set initial process
         document.getElementById('current-process').textContent = processes[1];
         
         // Check status every 5 seconds
