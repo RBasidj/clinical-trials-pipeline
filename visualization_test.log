@@ -270,3 +270,74 @@
 2025-05-16 07:54:34,271 - visualization-test - INFO - visualization_module: ✅ PASS
 2025-05-16 07:54:34,271 - visualization-test - INFO - cloud_storage: ✅ PASS
 2025-05-16 07:54:34,271 - visualization-test - INFO - Essential tests passed! Continue with local development.
+2025-05-16 09:30:52,926 - visualization-test - INFO - === Starting Visualization Debug Tests ===
+2025-05-16 09:30:52,927 - visualization-test - INFO - Testing matplotlib backend...
+2025-05-16 09:30:52,927 - visualization-test - INFO - Available matplotlib backends: ['gtk3agg', 'gtk3cairo', 'gtk4agg', 'gtk4cairo', 'macosx', 'nbagg', 'notebook', 'qtagg', 'qtcairo', 'qt5agg', 'qt5cairo', 'tkagg', 'tkcairo', 'webagg', 'wx', 'wxagg', 'wxcairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template']
+2025-05-16 09:30:52,948 - visualization-test - INFO - Current matplotlib backend: macosx
+2025-05-16 09:30:53,130 - visualization-test - INFO - ✅ Successfully created test plot (25647 bytes): test_plot.png
+2025-05-16 09:30:53,130 - visualization-test - INFO - Testing visualization module...
+2025-05-16 09:30:53,131 - visualization-test - INFO - Calling create_visualizations with test data to test_figures
+2025-05-16 09:30:53,131 - visualization - INFO - Starting visualization generation in test_figures
+2025-05-16 09:30:53,132 - visualization - INFO - Using matplotlib backend: Agg
+2025-05-16 09:30:53,132 - visualization - INFO - Creating modality distribution pie chart
+2025-05-16 09:30:53,417 - visualization - INFO - Saved test_figures/modality_distribution.png (size: 236498 bytes)
+2025-05-16 09:30:53,418 - visualization - INFO - Creating trial timeline visualization
+2025-05-16 09:30:53,776 - visualization - INFO - Saved test_figures/trial_timeline.png (size: 85309 bytes)
+2025-05-16 09:30:53,776 - visualization - INFO - Creating enrollment distribution visualization
+2025-05-16 09:30:54,016 - visualization - INFO - Saved test_figures/enrollment_distribution.png (size: 90141 bytes)
+2025-05-16 09:30:54,016 - visualization - INFO - Creating duration vs enrollment scatter plot
+2025-05-16 09:30:54,239 - visualization - INFO - Saved test_figures/duration_vs_enrollment.png (size: 105202 bytes)
+2025-05-16 09:30:54,239 - visualization - INFO - Creating top sponsors bar chart
+2025-05-16 09:30:54,471 - visualization - INFO - Saved test_figures/top_sponsors.png (size: 88224 bytes)
+2025-05-16 09:30:54,471 - visualization - INFO - Creating target distribution chart
+2025-05-16 09:30:54,684 - visualization - INFO - Saved test_figures/target_distribution.png (size: 87903 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/modality_distribution.png exists (size: 236498 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/trial_timeline.png exists (size: 85309 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/enrollment_distribution.png exists (size: 90141 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/duration_vs_enrollment.png exists (size: 105202 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/top_sponsors.png exists (size: 88224 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Verified file test_figures/target_distribution.png exists (size: 87903 bytes)
+2025-05-16 09:30:54,684 - visualization - INFO - Created 6 visualizations in test_figures
+2025-05-16 09:30:54,684 - visualization-test - INFO - ✅ Successfully created 6 visualization files
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/modality_distribution.png (236498 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/trial_timeline.png (85309 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/enrollment_distribution.png (90141 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/duration_vs_enrollment.png (105202 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/top_sponsors.png (88224 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO -   - test_figures/target_distribution.png (87903 bytes)
+2025-05-16 09:30:54,684 - visualization-test - INFO - Testing cloud storage...
+2025-05-16 09:30:54,915 - visualization-test - INFO - Testing upload_pipeline_outputs for run_id: debug_run
+2025-05-16 09:30:54,915 - cloud_storage - INFO - Starting upload of pipeline outputs for run ID: debug_run
+2025-05-16 09:30:54,915 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 09:30:54,915 - cloud_storage - INFO - No explicit credentials found, using default credentials
+2025-05-16 09:30:54,917 - cloud_storage - ERROR - Error initializing cloud storage: File /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json was not found.
+Traceback (most recent call last):
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/cloud_storage.py", line 46, in initialize_storage
+    storage_client = storage.Client()
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/cloud/storage/client.py", line 247, in __init__
+    super(Client, self).__init__(
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/cloud/client/__init__.py", line 338, in __init__
+    _ClientProjectMixin.__init__(self, project=project, credentials=credentials)
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/cloud/client/__init__.py", line 286, in __init__
+    project = self._determine_default(project)
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/cloud/client/__init__.py", line 305, in _determine_default
+    return _determine_default_project(project)
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/cloud/_helpers/__init__.py", line 152, in _determine_default_project
+    _, project = google.auth.default()
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/auth/_default.py", line 651, in default
+    credentials, project_id = checker()
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/auth/_default.py", line 644, in <lambda>
+    lambda: _get_explicit_environ_credentials(quota_project_id=quota_project_id),
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/auth/_default.py", line 293, in _get_explicit_environ_credentials
+    credentials, project_id = load_credentials_from_file(
+  File "/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/trials_venv/lib/python3.10/site-packages/google/auth/_default.py", line 125, in load_credentials_from_file
+    raise exceptions.DefaultCredentialsError(
+google.auth.exceptions.DefaultCredentialsError: File /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json was not found.
+2025-05-16 09:30:54,919 - cloud_storage - ERROR - Failed to initialize storage. Files will not be uploaded.
+2025-05-16 09:30:54,919 - visualization-test - ERROR - ❌ No files were uploaded to Cloud Storage
+2025-05-16 09:30:54,919 - visualization-test - INFO - This could be due to authentication issues - check your GOOGLE_APPLICATION_CREDENTIALS
+2025-05-16 09:30:54,919 - visualization-test - INFO - === Test Summary ===
+2025-05-16 09:30:54,919 - visualization-test - INFO - matplotlib_backend: ✅ PASS
+2025-05-16 09:30:54,919 - visualization-test - INFO - visualization_module: ✅ PASS
+2025-05-16 09:30:54,919 - visualization-test - INFO - cloud_storage: ❌ FAIL
+2025-05-16 09:30:54,919 - visualization-test - INFO - Essential tests passed! Continue with local development.

@@ -14,24 +14,29 @@ logger = logging.getLogger(__name__)
 BUCKET_NAME = os.environ.get("CLOUD_STORAGE_BUCKET", "clinicaltrialsv1")
 LOCAL_OUTPUT_DIRS = ["data", "results", "figures"]
 
+# In cloud_storage.py, modify the initialize_storage function to use your new key file:
+
 def initialize_storage():
     """Initialize Google Cloud Storage client with better error handling and logging"""
     try:
         logger.info(f"Initializing Google Cloud Storage with bucket: {BUCKET_NAME}")
         
+        # Add your new key file to the list of possible credential locations
         cred_locations = [
             os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
-            "clinicaltrials-v1-9acf57d456a4.json",  # Current directory
-            os.path.join(os.path.expanduser("~"), ".config/gcp", "clinicaltrials-v1-9acf57d456a4.json"),
-            "/app/clinicaltrials-v1-9acf57d456a4.json"  # For Cloud Run
+            "clinicaltrials-v1-5c24014c74c9.json",  # Your new key file
+            os.path.join(os.getcwd(), "clinicaltrials-v1-5c24014c74c9.json"),
+            "servicekey.json",
+            "clinicaltrials-v1-9acf57d456a4.json",  # Keep old key as fallback
+            os.path.join(os.path.expanduser("~"), ".config/gcp", "clinicaltrials-v1-5c24014c74c9.json"),
+            "/app/clinicaltrials-v1-5c24014c74c9.json"  # For Cloud Run
         ]
         
         creds_path = None
         for loc in cred_locations:
             if loc and os.path.exists(loc):
                 creds_path = loc
-                logger.info(f"Looking for credentials at: {creds_path}")
-                logger.info(f"Loading credentials from {creds_path}")
+                logger.info(f"Found credentials at: {creds_path}")
                 break
         
         if creds_path:
@@ -39,11 +44,16 @@ def initialize_storage():
             credentials = service_account.Credentials.from_service_account_file(creds_path)
             project_id = credentials.project_id
             logger.info(f"Loaded credentials for project: {project_id}")
-            logger.info(f"Creating storage client with explicit credentials for project {project_id}")
             storage_client = storage.Client(credentials=credentials, project=project_id)
         else:
-            logger.info("No explicit credentials found, using default credentials")
-            storage_client = storage.Client()
+            logger.warning("No explicit credentials found, using default credentials")
+            # Try to use the new environment variable directly if file not found
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "clinicaltrials-v1-5c24014c74c9.json"
+            try:
+                storage_client = storage.Client()
+            except Exception as client_error:
+                logger.error(f"Failed to create storage client: {client_error}")
+                return None, None
         
         logger.info(f"Checking if bucket {BUCKET_NAME} exists")
         bucket = storage_client.bucket(BUCKET_NAME)
