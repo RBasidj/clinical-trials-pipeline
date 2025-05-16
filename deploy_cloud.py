@@ -12,13 +12,14 @@ PROJECT_ID = "clinicaltrials-v1"
 REGION = "us-central1"
 SERVICE_NAME = "clinical-trials-pipeline"
 
+#robust argument thread (dedicating 4g minimum helps run up to 10 simulteanous instances with minimal resource loss)
 def parse_arguments():
     """Parse command line arguments for deployment configuration"""
     parser = argparse.ArgumentParser(description='Deploy Clinical Trials Pipeline to Google Cloud Run')
     
     parser.add_argument('--memory', type=str, default="4Gi",
                         help='Memory allocation (default: 4Gi)')
-    
+    # cpu usage optimized at 2 on GCP, but this scales well
     parser.add_argument('--cpu', type=str, default="2",
                         help='CPU allocation (default: 2)')
     
@@ -33,9 +34,11 @@ def parse_arguments():
     
     parser.add_argument('--max-instances', type=int, default=5,
                         help='Maximum number of instances (default: 5)')
+    #this can be scaled based on use-case^^^^
     
     return parser.parse_args()
 
+#service account has proper perms
 def setup_service_account():
     """Ensure service account exists with proper permissions"""
     print("Setting up service account...")
@@ -59,7 +62,7 @@ def setup_service_account():
             subprocess.run(create_sa_cmd, check=True)
             print("Service account created successfully.")
             
-            # Give the service account time to propagate
+            #  service account gets some time to propagate
             print("Waiting for service account to propagate...")
             time.sleep(5)
         else:
@@ -138,9 +141,9 @@ def deploy_to_cloud_run(args):
     "--platform", "managed",
     "--region", REGION,
     "--allow-unauthenticated",
-    "--memory", "6Gi",               # Increased from default
-    "--cpu", "4",                     # Increased from default
-    "--timeout", "30m",             # Increased from default
+    "--memory", "6Gi",               # increased from default
+    "--cpu", "4",                     # increased from default
+    "--timeout", "30m",             # increased from default
     "--concurrency", str(args.concurrency),
     "--min-instances", str(args.min_instances),
     "--max-instances", str(args.max_instances),
@@ -151,7 +154,7 @@ def deploy_to_cloud_run(args):
     "--service-account", service_account
 ]
     
-    # Execute 
+    # debug console 
     try:
         print("Building container...")
         print(f"Running command: {' '.join(build_cmd)}")
@@ -163,7 +166,7 @@ def deploy_to_cloud_run(args):
         subprocess.run(deploy_cmd, check=True)
         print(f"Deployed to Cloud Run: {SERVICE_NAME}")
         
-        # Get  service URL
+        #   service URL (custom per runtime)
         url_cmd = [
             "gcloud", "run", "services", "describe", SERVICE_NAME,
             "--platform", "managed",
