@@ -4,6 +4,9 @@
 servicekey.json
 CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
 clinicaltrials-v1-9acf57d456a4.json
+/Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-5c24014c74c9.json
+clinicaltrials-v1-*.json
+
 # Cache files
 __pycache__/
 *.py[cod]
