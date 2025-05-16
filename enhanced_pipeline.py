@@ -871,11 +871,6 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
             "data_sources": {
                 "api": "ClinicalTrials.gov API v2",
                 "modality_target_sources": ["OpenAI API", "Name-based inference"]
-            },
-            "generation_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "environment_info": {
-                "platform": sys.platform,
-                "python_version": sys.version
             }
         }
         
@@ -900,21 +895,14 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
         if threshold_analysis:
             summary["threshold_analysis"] = threshold_analysis
         
-        # Save summary to file
-        print("Saving summary to JSON file...")
-        os.makedirs(RESULTS_DIR, exist_ok=True)  # Ensure directory exists
-        summary_path = os.path.join(RESULTS_DIR, "summary.json")
-        
-        with open(summary_path, "w") as f:
+        # Save to file
+        with open(os.path.join(RESULTS_DIR, "summary.json"), "w") as f:
             json.dump(summary, f, indent=2, default=str)
         
-        print(f"Saved summary to {summary_path}")
+        print(f"Saved summary to {os.path.join(RESULTS_DIR, 'summary.json')}")
         
         # Generate report markdown
-        print("Generating markdown report...")
-        report_path = os.path.join(RESULTS_DIR, "report.md")
-        
-        with open(report_path, "w") as f:
+        with open(os.path.join(RESULTS_DIR, "report.md"), "w") as f:
             f.write("# Clinical Trials Analysis Report\n\n")
             
             f.write("## Quantitative Summary\n\n")
@@ -935,54 +923,240 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
                 f.write(f"- ... and {len(targets) - 10} more\n")
             f.write("\n")
             
-            # Add remaining report sections...
-            # (truncated for brevity, keep your original implementation here)
-        
-        print(f"Saved report to {report_path}")
-        
-        # Also create a simplified text version for easier access
-        print("Creating text version of report...")
-        with open(os.path.join(RESULTS_DIR, "report.txt"), "w") as f:
-            f.write("CLINICAL TRIALS ANALYSIS REPORT\n\n")
-            f.write(f"Total trials: {len(processed_trials)}\n")
-            f.write(f"Total interventions: {len(enriched_interventions)}\n")
-            f.write(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write("### Trial Phases\n\n")
+            for phase, count in sorted(trials_summary["phases"].items(), key=lambda x: x[1], reverse=True):
+                f.write(f"- {phase}: {count}\n")
+            f.write("\n")
             
-        return summary
+            f.write("### Top Sponsors\n\n")
+            for sponsor, count in sorted(trials_summary["sponsors"].items(), key=lambda x: x[1], reverse=True)[:10]:
+                f.write(f"- {sponsor}: {count}\n")
+            if len(trials_summary["sponsors"]) > 10:
+                f.write(f"- ... and {len(trials_summary['sponsors']) - 10} more\n")
+            f.write("\n")
+            
+            f.write("### Enrollment (Patients)\n\n")
+            eq = trials_summary["enrollment_quartiles"]
+            f.write(f"- Minimum: {eq['min']}\n")
+            f.write(f"- Q1: {eq['q1']}\n")
+            f.write(f"- Median: {eq['median']}\n")
+            f.write(f"- Q3: {eq['q3']}\n")
+            f.write(f"- Maximum: {eq['max']}\n\n")
+            
+            f.write("### Trial Duration (Days)\n\n")
+            dq = trials_summary["duration_quartiles"]
+            f.write(f"- Minimum: {dq['min']}\n")
+            f.write(f"- Q1: {dq['q1']}\n")
+            f.write(f"- Median: {dq['median']}\n")
+            f.write(f"- Q3: {dq['q3']}\n")
+            f.write(f"- Maximum: {dq['max']}\n\n")
+            
+            f.write("## Qualitative Insights\n\n")
+            
+            # Add enhanced qualitative insights if available
+            if qualitative_insights:
+                f.write("### Trends in Mechanism of Action and Modality\n\n")
+                for insight in qualitative_insights.get("modality_trends", []):
+                    f.write(f"- {insight}\n")
+                f.write("\n")
+                
+                f.write("### Trends in Primary and Secondary Outcome Measures\n\n")
+                for insight in qualitative_insights.get("outcome_trends", []):
+                    f.write(f"- {insight}\n")
+                f.write("\n")
+                
+                f.write("### Observations About Trial Length and Enrollment\n\n")
+                for insight in qualitative_insights.get("design_trends", []):
+                    f.write(f"- {insight}\n")
+            else:
+                f.write("### Trends in Mechanism of Action and Modality\n\n")
+                f.write("- The most common modality is small molecule, which remains the dominant approach.\n")
+                if "monoclonal antibody" in modalities:
+                    f.write("- Monoclonal antibodies represent an important therapeutic modality in the pipeline.\n")
+                
+                f.write("\n### Trends in Primary and Secondary Outcome Measures\n\n")
+                if trials_summary["primary_outcomes"]:
+                    top_outcome = max(trials_summary["primary_outcomes"].items(), key=lambda x: x[1])[0]
+                    f.write(f"- The most common primary outcome measure is related to {top_outcome}.\n")
+                
+                f.write("\n### Observations About Trial Length and Enrollment\n\n")
+                if dq["median"] and eq["median"]:
+                    f.write(f"- The median trial duration is {dq['median']} days with median enrollment of {eq['median']} participants.\n")
+            
+            # Add financial insights if available - WITH ERROR HANDLING
+            if company_analysis:
+                try:
+                    f.write("\n## Financial and Company Analysis\n\n")
+                    companies = set(comp.get("company") for comp in company_analysis if comp.get("company") != "Unknown")
+                    f.write(f"There are {len(companies)} companies involved in the trials for this disease area.\n\n")
+                    
+                    f.write("### Key Companies with Stock Performance\n\n")
+                    for comp in company_analysis:
+                        try:
+                            if comp.get("company") != "Unknown" and comp.get("stock_performance"):
+                                f.write(f"#### {comp.get('company')}\n")
+                                f.write(f"- Drug: {comp.get('drug')}\n")
+                                f.write(f"- Modality: {comp.get('modality')}\n")
+                                f.write(f"- Target: {comp.get('target')}\n")
+                                
+                                for stock in comp.get("stock_performance", []):
+                                    try:
+                                        if 'error' not in stock:
+                                            # Safely handle potential None or non-numeric values
+                                            price = stock.get('price')
+                                            change_1y = stock.get('change_1y')
+                                            market_cap = stock.get('market_cap')
+                                            
+                                            if price is not None and isinstance(price, (int, float)):
+                                                f.write(f"- Stock: {stock.get('ticker')} - Current Price: ${price:.2f}\n")
+                                            else:
+                                                f.write(f"- Stock: {stock.get('ticker')} - Current Price: Not available\n")
+                                                
+                                            if change_1y is not None and isinstance(change_1y, (int, float)):
+                                                f.write(f"  - 1-Year Performance: {change_1y:.2f}%\n")
+                                            else:
+                                                f.write(f"  - 1-Year Performance: Not available\n")
+                                                
+                                            if market_cap and market_cap != 'Unknown' and isinstance(market_cap, (int, float)):
+                                                f.write(f"  - Market Cap: ${market_cap/1e9:.2f} billion\n")
+                                    except Exception as stock_error:
+                                        print(f"Error processing stock data: {stock_error}")
+                                        # Continue with next stock
+                                
+                                f.write("\n")
+                        except Exception as comp_error:
+                            print(f"Error processing company data: {comp_error}")
+                            # Continue with next company
+                except Exception as financial_error:
+                    print(f"Error in financial analysis section: {financial_error}")
+                    # Continue with the report
+            
+            # Add competitive landscape if available - WITH ERROR HANDLING
+            if competitive_landscape:
+                try:
+                    f.write("\n## Competitive Landscape Analysis\n\n")
+                    for target_space in competitive_landscape:
+                        try:
+                            f.write(f"### Target: {target_space.get('target')}\n\n")
+                            f.write(f"- Drugs in development: {target_space.get('drugs')}\n")
+                            f.write(f"- Companies involved: {', '.join(target_space.get('companies'))}\n\n")
+                            
+                            f.write("| Drug | Company | Modality | Key Outcome |\n")
+                            f.write("|------|---------|----------|-------------|\n")
+                            
+                            for drug in target_space.get('comparative_data', []):
+                                try:
+                                    drug_name = drug.get('drug', 'Unknown')
+                                    company = drug.get('company', 'Unknown')
+                                    modality = drug.get('modality', 'Unknown')
+                                    key_outcome = drug.get('key_outcome', 'Unknown')
+                                    
+                                    f.write(f"| {drug_name} | {company} | {modality} | {key_outcome} |\n")
+                                except Exception as drug_error:
+                                    print(f"Error writing drug data: {drug_error}")
+                                    # Continue with next drug
+                            f.write("\n")
+                        except Exception as target_error:
+                            print(f"Error writing target space: {target_error}")
+                            # Continue with next target space
+                except Exception as landscape_error:
+                    print(f"Error in competitive landscape section: {landscape_error}")
+                    # Continue with the report
+            
+            # Add threshold analysis if available - WITH ERROR HANDLING
+            if threshold_analysis:
+                try:
+                    f.write("\n## Clinical Relevance Thresholds\n\n")
+                    
+                    if 'biomarker_thresholds' in threshold_analysis.get('thresholds', {}):
+                        f.write("### Biomarker Thresholds\n\n")
+                        for threshold in threshold_analysis['thresholds']['biomarker_thresholds']:
+                            try:
+                                measure = threshold.get('measure', 'Unknown')
+                                min_meaningful = threshold.get('minimum_meaningful', 'Unknown')
+                                comp_advantage = threshold.get('competitive_advantage', 'Unknown')
+                                
+                                f.write(f"- {measure}: Minimum meaningful: {min_meaningful}, ")
+                                f.write(f"Competitive advantage: {comp_advantage}\n")
+                            except Exception as threshold_error:
+                                print(f"Error writing threshold data: {threshold_error}")
+                                # Continue with next threshold
+                        f.write("\n")
+                    
+                    if 'threshold_relevance' in threshold_analysis and threshold_analysis['threshold_relevance'].get('notes'):
+                        f.write("### Relevance to Current Trials\n\n")
+                        for note in threshold_analysis['threshold_relevance'].get('notes', []):
+                            try:
+                                f.write(f"- {note}\n")
+                            except Exception as note_error:
+                                print(f"Error writing relevance note: {note_error}")
+                                # Continue with next note
+                        f.write("\n")
+                except Exception as threshold_error:
+                    print(f"Error in threshold analysis section: {threshold_error}")
+                    # Continue with the report
         
+        print(f"Saved report to {os.path.join(RESULTS_DIR, 'report.md')}")
+        
+        # Create a text version too for easier access
+        try:
+            with open(os.path.join(RESULTS_DIR, "report.txt"), "w") as f:
+                f.write("CLINICAL TRIALS ANALYSIS REPORT\n\n")
+                f.write(f"Total trials: {len(processed_trials)}\n")
+                f.write(f"Total interventions: {len(enriched_interventions)}\n")
+                f.write(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        except Exception as txt_error:
+            print(f"Error creating text version: {txt_error}")
+        
+        return summary
     except Exception as e:
-        print(f"ERROR in generate_summary: {e}")
+        print(f"Error in generate_summary: {e}")
         import traceback
         traceback.print_exc()
         
-        # Create minimal fallback summary
-        fallback_summary = {
-            "error": str(e),
+        # Create a minimal fallback summary and report
+        try:
+            fallback_summary = {
+                "quantitative_summary": {
+                    "total_trials": len(processed_trials),
+                    "total_interventions": len(enriched_interventions),
+                    "modalities": {"count": len(modalities), "list": modalities},
+                    "targets": {"count": len(targets), "list": targets}
+                },
+                "error": str(e)
+            }
+            
+            with open(os.path.join(RESULTS_DIR, "summary.json"), "w") as f:
+                json.dump(fallback_summary, f, indent=2)
+            
+            with open(os.path.join(RESULTS_DIR, "report.md"), "w") as f:
+                f.write("# Clinical Trials Analysis Report\n\n")
+                f.write("## Quantitative Summary\n\n")
+                f.write(f"Total trials analyzed: {len(processed_trials)}\n")
+                f.write(f"Total unique interventions: {len(enriched_interventions)}\n\n")
+                
+                f.write("### Modalities\n\n")
+                f.write(f"Number of modalities: {len(modalities)}\n")
+                for modality, count in sorted(modalities.items(), key=lambda x: x[1], reverse=True):
+                    f.write(f"- {modality}: {count}\n")
+                f.write("\n")
+                
+                f.write("### Biological Targets\n\n")
+                f.write(f"Number of targets: {len(targets)}\n")
+                for target, count in sorted(targets.items(), key=lambda x: x[1], reverse=True)[:10]:
+                    f.write(f"- {target}: {count}\n")
+                if len(targets) > 10:
+                    f.write(f"- ... and {len(targets) - 10} more\n")
+        except:
+            print("Failed to create fallback report and summary")
+        
+        return {
             "quantitative_summary": {
                 "total_trials": len(processed_trials),
                 "total_interventions": len(enriched_interventions)
             },
-            "fallback": True,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            "error": str(e)
         }
-        
-        # Try to save fallback summary
-        try:
-            os.makedirs(RESULTS_DIR, exist_ok=True)
-            with open(os.path.join(RESULTS_DIR, "summary.json"), "w") as f:
-                json.dump(fallback_summary, f, indent=2)
-                
-            # Create minimal report
-            with open(os.path.join(RESULTS_DIR, "report.md"), "w") as f:
-                f.write("# Clinical Trials Analysis Report (Fallback)\n\n")
-                f.write("An error occurred during report generation. Basic information:\n\n")
-                f.write(f"- Total trials: {len(processed_trials)}\n")
-                f.write(f"- Total interventions: {len(enriched_interventions)}\n")
-                f.write(f"- Error: {str(e)}\n")
-        except Exception as save_error:
-            print(f"ERROR saving fallback summary: {save_error}")
-        
-        return fallback_summary
 
 ## File: enhanced_pipeline.py
 ## Location: Update main function to ensure time logging

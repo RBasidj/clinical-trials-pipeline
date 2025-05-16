@@ -284,17 +284,19 @@ def results(run_id):
                     "design_trends": ["Analysis not available - could not generate design insights"]
                 }
 
+        # In app.py, modify the visualization filtering in the results route
         visualizations = []
         viz_source = None
 
         if 'files' in run_info and run_info['files']:
-            logger.info(f"Checking cloud storage for visualizations")
+            print(f"Checking cloud storage for visualizations")
             for file_path, url in run_info['files'].items():
-                if 'figures/' in file_path and file_path.endswith('.png'):
+                if ('figures/' in file_path and file_path.endswith('.png') and 
+                    'test_cloud_storage' not in file_path and 'test' not in file_path):
                     filename = os.path.basename(file_path)
                     name = filename.replace('.png', '').replace('_', ' ').title()
                     visualizations.append({'name': name, 'url': url})
-                    logger.info(f"Found cloud visualization: {name} -> {url}")
+                    print(f"Found cloud visualization: {name} -> {url}")
             viz_source = "cloud" if visualizations else "none"
 
         if not visualizations:
@@ -377,7 +379,7 @@ app.jinja_env.globals.update(get_local_files=get_local_files)
 @app.route('/files/<path:filename>')
 def files(filename):
     return send_from_directory('results', filename)
-    
+
 @app.route('/api/debug_report/<run_id>', methods=['GET'])
 def debug_report(run_id):
     """Endpoint to debug and fix report generation issues"""

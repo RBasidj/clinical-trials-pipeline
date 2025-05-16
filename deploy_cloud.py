@@ -138,9 +138,9 @@ def deploy_to_cloud_run(args):
     "--platform", "managed",
     "--region", REGION,
     "--allow-unauthenticated",
-    "--memory", args.memory,               # Increased from default
-    "--cpu", args.cpu,                     # Increased from default
-    "--timeout", args.timeout,             # Increased from default
+    "--memory", "6Gi",               # Increased from default
+    "--cpu", "4",                     # Increased from default
+    "--timeout", "30m",             # Increased from default
     "--concurrency", str(args.concurrency),
     "--min-instances", str(args.min_instances),
     "--max-instances", str(args.max_instances),
