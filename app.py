@@ -9,7 +9,7 @@ import logging
 import threading
 import time
 
-# Configure logging
+#  logging config happens here
 logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'results'
 
-# Store run information in memory
+#  run information can be stored direct in memory (works for GCP)
 runs = {}
 
 @app.route('/')
@@ -52,7 +52,7 @@ def run_analysis():
     for directory in ['data', 'results', 'figures']:
         os.makedirs(directory, exist_ok=True)
 
-    # Start the pipeline process in a background thread to avoid blocking
+    #  pipeline process in a background thread to avoid blocking (also GCP)
     cmd = [
         'python', 'enhanced_pipeline.py',
         '--disease', disease,
@@ -64,16 +64,16 @@ def run_analysis():
     if industry_only:
         cmd.append('--industry-only')
         
-    # FIX: Use --skip-financial when financial analysis is NOT selected
+    # FIX: use --skip-financial when financial analysis is NOT selected
     if not financial_analysis:
         cmd.append('--skip-financial')
 
-    # Start a background thread to run the pipeline
+    # a background thread to run the pipeline (needs to be background or this won't work)
     def run_pipeline_process():
         try:
             logger.info(f"Running command: {' '.join(cmd)}")
             
-            # Update progress
+            # progress here
             runs[run_id]['progress'] = {
                 'step': 1,
                 'message': 'Fetching clinical trials from API...',
@@ -89,7 +89,7 @@ def run_analysis():
             else:
                 logger.info(f"Pipeline executed successfully: {result.stdout}")
 
-                # Update progress
+                # progress
                 runs[run_id]['progress'] = {
                     'step': 5,
                     'message': 'Processing complete, preparing results...',
@@ -110,7 +110,7 @@ def run_analysis():
                         runs[run_id]['files'] = file_urls
                         runs[run_id]['end_time'] = datetime.now().isoformat()
                         
-                        # Update progress
+                        # progress
                         runs[run_id]['progress'] = {
                             'step': 6,
                             'message': 'Analysis complete!',
@@ -127,20 +127,20 @@ def run_analysis():
             runs[run_id]['status'] = 'error'
             runs[run_id]['error'] = str(e)
 
-    # Start the thread
+    # the thread begins...
     import threading
     thread = threading.Thread(target=run_pipeline_process)
     thread.daemon = True
     thread.start()
     
-    # Add to the run_analysis function in app.py, right before returning the redirect
+    # add run_analysis function in app.py, right before returning the redirect
 
-    # Add timeout handling and report verification
+    # this is for timeout handling
     report_timeout = 30  # seconds
     start_check_time = time.time()
     report_found = False
 
-    # Check if the report has been generated
+    # check for report generation
     report_path = os.path.join('results', 'report.md')
     while time.time() - start_check_time < report_timeout:
         if os.path.exists(report_path):
@@ -155,7 +155,7 @@ def run_analysis():
     if not report_found:
         print(f"WARNING: Report not found after {report_timeout} seconds. Proceeding anyway.")
         
-        # Create a fallback report if needed
+        # fallck report if needed (hopefully not)
         try:
             with open(report_path, 'w') as f:
                 f.write("# Analysis Report\n\n")
@@ -165,7 +165,7 @@ def run_analysis():
         except Exception as e:
             print(f"Error creating fallback report: {e}")
 
-    # Check all output files
+    # check on all output files
     for directory in ['data', 'results', 'figures']:
         if os.path.exists(directory):
             files = os.listdir(directory)
@@ -173,7 +173,7 @@ def run_analysis():
         else:
             print(f"Directory not found: {directory}")
 
-    # Add debugging information to the run info
+    #  ADDED: debug info for timeout cases
     runs[run_id]['debug_info'] = {
         'report_found': report_found,
         'execution_time': time.time() - runs[run_id].get('start_time_epoch', 0),
@@ -185,7 +185,6 @@ def run_analysis():
         }
     }
 
-    # Immediately redirect to the progress page
     return redirect(url_for('progress', run_id=run_id))
     
 @app.route('/progress/<run_id>')
@@ -199,7 +198,6 @@ def progress(run_id):
     run_info = runs[run_id]
     disease = run_info['disease']
     
-    # If process already completed, redirect to results
     if run_info['status'] != 'running':
         return redirect(url_for('results', run_id=run_id))
     
@@ -253,12 +251,12 @@ def results(run_id):
                 summary = {"error": "Summary file not found or invalid"}
                 summary_source = "error"
 
-        # Generate qualitative insights on-the-fly if missing
+        #  qualitative insights on-the-fly if missing
         if summary and 'qualitative_insights' not in summary:
             try:
                 from analysis import generate_qualitative_insights
                 
-                # Load processed trials and enriched interventions data
+                #  processed trials and enriched interventions data
                 processed_trials = []
                 enriched_interventions = []
                 
@@ -271,7 +269,7 @@ def results(run_id):
                 except Exception as e:
                     logger.error(f"Error loading CSV data: {e}")
                     
-                # Generate insights if we have data
+                # IF data, then insights (simple version)
                 if processed_trials and enriched_interventions:
                     qualitative_insights = generate_qualitative_insights(processed_trials, enriched_interventions)
                     summary['qualitative_insights'] = qualitative_insights
@@ -284,7 +282,7 @@ def results(run_id):
                     "design_trends": ["Analysis not available - could not generate design insights"]
                 }
 
-        # In app.py, modify the visualization filtering in the results route
+        #  the visualization filtering in the results route
         visualizations = []
         viz_source = None
 
@@ -346,7 +344,6 @@ def run_status(run_id):
 
     run_info = runs[run_id]
     
-    # Create response with detailed status
     response = {
         'status': run_info['status'],
         'disease': run_info['disease'],
@@ -363,7 +360,7 @@ def run_status(run_id):
     if 'error' in run_info:
         response['error'] = run_info['error']
     
-    # Include log snippets if available
+    # log snippets if available
     if 'log_entries' in run_info:
         response['log_entries'] = run_info.get('log_entries', [])[-5:]  # Last 5 log entries
 
@@ -388,12 +385,12 @@ def debug_report(run_id):
     
     run_info = runs[run_id]
     
-    # Check if report exists in cloud storage
+    # this helps cloud storage reports parse
     from cloud_storage import check_result_exists, add_empty_report
     
     report_exists = check_result_exists(run_id, 'report.md')
     
-    # If report doesn't exist, create an empty one
+    # no reports creates an empty one (possible GCP error)
     if not report_exists:
         success = add_empty_report(run_id)
         if success:
