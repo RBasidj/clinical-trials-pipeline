@@ -26,7 +26,7 @@ import time
 
 def cache_key(func_name, args_dict):
     """Generate a cache key from function name and arguments"""
-    # Convert args to a stable string representation and hash it
+    # takes args to a stable string representation and hashes it
     args_str = str(sorted(args_dict.items()))
     return f"{func_name}_{hashlib.md5(args_str.encode()).hexdigest()}"
 
@@ -35,7 +35,7 @@ def cache_result(cache_dir, key, result, expiry_days=30):
     os.makedirs(cache_dir, exist_ok=True)
     cache_file = os.path.join(cache_dir, f"{key}.pkl")
     
-    # Store the result along with timestamp
+    # result and timestamp stored (it begins here)
     data = {
         "timestamp": time.time(),
         "expiry_days": expiry_days,
@@ -62,11 +62,11 @@ def get_cached_result(cache_dir, key):
         with open(cache_file, "rb") as f:
             data = pickle.load(f)
         
-        # Check if expired
+        # expired? this should take 7 days
         now = time.time()
-        expiry_seconds = data["expiry_days"] * 86400  # Convert days to seconds
+        expiry_seconds = data["expiry_days"] * 86400  # unfortunately we express days in seconds when programming
         if now - data["timestamp"] > expiry_seconds:
-            # Cache expired
+            # if cache expired, it catches it here
             print(f"Cache expired for {cache_file}")
             return None
         
@@ -100,10 +100,10 @@ try:
     from dotenv import load_dotenv
     print("✓ Successfully imported openai and dotenv")
     
-    # Load environment variables from .env file
+    #  environment variables from .env file, (industry security standard)
     load_dotenv()
     
-    # Set OpenAI API key
+    # OpenAI API key
     openai.api_key = os.getenv("OPENAI_API_KEY")
     if not openai.api_key:
         print("⚠️ WARNING: OPENAI_API_KEY not found in environment variables")
@@ -117,7 +117,7 @@ except ImportError:
     print("OpenAI enrichment will be skipped")
     OPENAI_AVAILABLE = False
 
-# Begin grabbing arguements from frontend
+# grabbing arguements from frontend
 def parse_arguments():
     """Parse command line arguments for the pipeline"""
     import argparse
@@ -151,7 +151,6 @@ def parse_arguments():
     args = parser.parse_args()
     return args
 
-# Create directories
 CACHE_DIR = "cache"
 DATA_DIR = "data"
 RESULTS_DIR = "results"
@@ -161,14 +160,14 @@ for directory in [CACHE_DIR, DATA_DIR, RESULTS_DIR, FIGURES_DIR]:
     os.makedirs(directory, exist_ok=True)
     print(f"Created directory: {directory}")
 
-#Query the clinical trials API for the given diseases
+#here we use requests to query the clinical trials API for the given diseases
 
 def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
                          human_studies=True, years_back=15, max_results=None):
     """Fetch clinical trials for a disease using the v2 API with caching"""
     print(f"Fetching clinical trials for {disease}")
     
-    # Generate cache key
+    # get cache key
     cache_args = {
         "disease": disease,
         "industry_sponsored": industry_sponsored,
@@ -179,19 +178,18 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
     }
     key = cache_key("fetch_clinical_trials", cache_args)
     
-    # Check cache first
+    # Check cache first, improves time efficiency up to 11x
     cached_result = get_cached_result(CACHE_DIR, key)
     if cached_result is not None:
         print(f"Retrieved {len(cached_result)} trials from cache")
+        #works especially well on GCP infrastructure
         return cached_result
     
     base_url = "https://clinicaltrials.gov/api/v2/studies"
     
-    # Calculate date 15 years ago for filtering
+    #  date 15 years ago for filtering
     start_date = (datetime.now() - timedelta(days=365*years_back)).strftime("%Y-%m-%d")
     
-    # Build query parameters correctly for v2 API
-    # Using query.titles as shown in the example code
     params = {
         "query.titles": disease,
         "pageSize": 100,
@@ -199,11 +197,10 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
     }
     
     if industry_sponsored:
-        # We do filtering in post-processing to avoid query parameter issues
+        #filtering in post-processing to avoid query parameter issues
         pass
         
     if interventional:
-        # We do filtering in post-processing to avoid query parameter issues
         pass
     
     print(f"API request URL: {base_url}")
@@ -227,10 +224,10 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
         
         print(f"Received {len(studies)} studies from API (total available: {total_count})")
         
-        # Filter studies based on criteria
+        # = studies based on criteria
         filtered_studies = []
         for study in studies:
-            # Check if study meets our criteria
+            #  if study meets our criteria
             if industry_sponsored:
                 sponsor_module = study.get("protocolSection", {}).get("sponsorCollaboratorsModule", {})
                 lead_sponsor = sponsor_module.get("leadSponsor", {})
@@ -242,26 +239,24 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
                 if design_module.get("studyType") != "INTERVENTIONAL":
                     continue
             
-            # Check date criteria
+            #  date criteria
             status_module = study.get("protocolSection", {}).get("statusModule", {})
             start_date_struct = status_module.get("startDateStruct", {})
             study_start_date = start_date_struct.get("date", "")
             
-            # Add study if it passes all filters
+            #  study if it passes all filter gets passed into enrichment
             filtered_studies.append(study)
         
         print(f"After filtering: {len(filtered_studies)} studies match criteria")
         all_studies.extend(filtered_studies)
         
-        # Get additional pages if needed
+        #  additional pages if needed, this works in multiples of 10 or 100
         while "nextPageToken" in data and data["nextPageToken"] and (not max_results or len(all_studies) < max_results):
             next_token = data["nextPageToken"]
             print(f"Fetching next page with token: {next_token[:10]}...")
             
-            # Update token for next page
             params["pageToken"] = next_token
             
-            # Make the request
             response = requests.get(base_url, params=params)
             if response.status_code != 200:
                 print(f"Error fetching next page: {response.status_code}")
@@ -271,10 +266,8 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
             page_studies = data.get("studies", [])
             print(f"Received {len(page_studies)} more studies")
             
-            # Filter studies again
             filtered_page_studies = []
             for study in page_studies:
-                # Check if study meets our criteria
                 if industry_sponsored:
                     sponsor_module = study.get("protocolSection", {}).get("sponsorCollaboratorsModule", {})
                     lead_sponsor = sponsor_module.get("leadSponsor", {})
@@ -286,28 +279,26 @@ def fetch_clinical_trials(disease, industry_sponsored=True, interventional=True,
                     if design_module.get("studyType") != "INTERVENTIONAL":
                         continue
                 
-                # Add study if it passes all filters
+                # double filter study if it passes all filters
                 filtered_page_studies.append(study)
             
             print(f"After filtering page: {len(filtered_page_studies)} studies match criteria")
             all_studies.extend(filtered_page_studies)
             
-            # Apply max_results limit if specified
+            #  max_results limit if specified
             if max_results and max_results > 0 and len(all_studies) > max_results:
                 all_studies = all_studies[:max_results]
             print(f"Total studies after all pages and filtering: {len(all_studies)}")
 
             
-            # Avoid overloading the API
+            # avoid overloading the API
             time.sleep(0.5)
-        
-        # Apply max_results limit if not already applied
+        #this runs twice or buggy
         if max_results and len(all_studies) > max_results:
             all_studies = all_studies[:max_results]
         
         print(f"Total studies after all pages and filtering: {len(all_studies)}")
         
-        # Cache the result before returning
         if all_studies:
             cache_result(CACHE_DIR, key, all_studies)
         
@@ -324,35 +315,34 @@ def extract_study_details(studies):
     
     for study in studies:
         try:
-            # Extract protocol section
             protocol = study.get("protocolSection", {})
             
-            # Extract identification info
+            #  identification info
             identification = protocol.get("identificationModule", {})
             nct_id = identification.get("nctId")
             title = identification.get("briefTitle")
             
-            # Extract status info
+            #  status info
             status_module = protocol.get("statusModule", {})
             status = status_module.get("overallStatus") if status_module else None
             start_date = status_module.get("startDateStruct", {}).get("date") if status_module else None
             completion_date = status_module.get("completionDateStruct", {}).get("date") if status_module else None
             
-            # Extract design info
+            #  design info
             design_module = protocol.get("designModule", {})
             study_type = design_module.get("studyType") if design_module else None
             phases = design_module.get("phases", [])
             phase = phases[0] if phases else "Not Available"
             
-            # Extract sponsor info
+            #  sponsor info
             sponsor_module = protocol.get("sponsorCollaboratorsModule", {})
             lead_sponsor = sponsor_module.get("leadSponsor", {}).get("name", "Unknown") if sponsor_module else "Unknown"
             
-            # Extract condition info
+            #  condition info
             condition_module = protocol.get("conditionsModule", {})
             conditions = condition_module.get("conditions", []) if condition_module else []
             
-            # Extract intervention info
+            #  intervention info
             intervention_module = protocol.get("armsInterventionsModule", {})
             interventions = []
             
@@ -365,16 +355,16 @@ def extract_study_details(studies):
                             'description': intervention.get("description")
                         })
             
-            # Extract eligibility info
+            #  eligibility info
             eligibility_module = protocol.get("eligibilityModule", {})
             min_age = eligibility_module.get("minimumAge") if eligibility_module else None
             max_age = eligibility_module.get("maximumAge") if eligibility_module else None
             gender = eligibility_module.get("sex") if eligibility_module else None
             
-            # Extract enrollment info
+            #  enrollment info
             enrollment = design_module.get("enrollmentInfo", {}).get("count") if design_module else None
             
-            # Extract outcome measures
+            #  outcome measures
             outcome_module = protocol.get("outcomesModule", {})
             primary_outcomes = []
             secondary_outcomes = []
@@ -390,7 +380,7 @@ def extract_study_details(studies):
                     for outcome in outcome_module.get("secondaryOutcomes", [])
                 ]
             
-            # Calculate trial duration in days
+            #  trial duration in days
             duration = None
             if start_date and completion_date:
                 try:
@@ -409,7 +399,7 @@ def extract_study_details(studies):
                         print(f"Could not calculate duration for {nct_id}: {date_error}")
                         duration = None
             
-            # Create processed study record
+            #  processed study record
             processed_study = {
                 'nct_id': nct_id,
                 'title': title,
@@ -464,11 +454,11 @@ def infer_modality_from_name(drug_name):
         
     drug_lower = drug_name.lower()
     
-    # Check for monoclonal antibody naming convention
+    # check (for example) for monoclonal antibody naming convention
     if any(suffix in drug_lower for suffix in ["mab", "umab", "ximab", "zumab", "imab"]):
         return "monoclonal antibody"
     
-    # Check for patterns in name
+    #   patterns in name (modalities are common in clinical trials) this employs fuzzy logic so not a concrete list
     modality_patterns = {
         "small molecule": ["small molecule", "synthetic", "chemical", "inhibitor", "antagonist", "agonist"],
         "peptide": ["peptide", "protein", "polypeptide"],
@@ -483,14 +473,9 @@ def infer_modality_from_name(drug_name):
         if any(pattern in drug_lower for pattern in patterns):
             return modality
     
-    # Default if no pattern matches
+    #  if no pattern matches, return small molecule and re-run identifcation workflow (hence fuzzy, works for now)
     return "small molecule"
 
-## File: enhanced_pipeline.py
-## Location: Modify query_openai_for_drug_info function to accept a client parameter
-
-## File: enhanced_pipeline.py
-## Location: Replace the entire query_openai_for_drug_info function
 
 def query_openai_for_drug_info(drug_name, client=None):
     """
@@ -500,11 +485,11 @@ def query_openai_for_drug_info(drug_name, client=None):
     if not OPENAI_AVAILABLE:
         return None
     
-    # Generate cache key
+    #  cache key
     cache_args = {"drug_name": drug_name.lower()}  # Lowercase for consistent caching
     key = cache_key("query_openai_for_drug_info", cache_args)
     
-    # Check cache first
+    # Check cache 
     cached_result = get_cached_result(CACHE_DIR, key)
     if cached_result is not None:
         print(f"Retrieved OpenAI info for {drug_name} from cache")
@@ -513,7 +498,7 @@ def query_openai_for_drug_info(drug_name, client=None):
     try:
         print(f"Querying OpenAI for information about {drug_name}")
         
-        # Create the prompt
+        #  the prompt
         prompt = f"""
         I need information about the drug or intervention "{drug_name}". 
         Please determine:
@@ -527,10 +512,11 @@ def query_openai_for_drug_info(drug_name, client=None):
             "confidence": "high/medium/low"
         }}
         
-        If you're unsure, use "unknown" for the value and "low" for confidence.
+        If you're unsure, use "unknown" for the value and "low" for confidence. Ensure you are using your web-search and deep-research capabilities where possible. For every low-confidence 
+        output, re-try one time.
         """
         
-        # Use provided client or create a new one
+        #  provided client or create a new one
         if client is None:
             from openai import OpenAI
             client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -544,10 +530,10 @@ def query_openai_for_drug_info(drug_name, client=None):
             max_tokens=300
         )
         
-        # Extract response content
+        #  response content
         content = response.choices[0].message.content
         
-        # Try to parse JSON from the response
+        #  parse JSON from the response
         try:
             # Find JSON object in response
             start_idx = content.find('{')
@@ -563,7 +549,7 @@ def query_openai_for_drug_info(drug_name, client=None):
                     "confidence": data.get("confidence", "low")
                 }
                 
-                # Cache successful result
+                #  successful result! cache !
                 cache_result(CACHE_DIR, key, result)
                 
                 return result
@@ -586,7 +572,6 @@ def enrich_interventions(interventions, use_openai=True, max_workers=5):
     print(f"Enriching {len(interventions)} interventions with parallel processing")
     enriched_data = []
     
-    # Use thread-local storage for OpenAI client
     local = threading.local()
     
     def get_openai_client():
@@ -1114,7 +1099,7 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
         import traceback
         traceback.print_exc()
         
-        # Create a minimal fallback summary and report
+        #  a minimal fallback summary and report
         try:
             fallback_summary = {
                 "quantitative_summary": {
@@ -1158,8 +1143,6 @@ def generate_summary(processed_trials, enriched_interventions, qualitative_insig
             "error": str(e)
         }
 
-## File: enhanced_pipeline.py
-## Location: Update main function to ensure time logging
 
 def main():
     """Run the enhanced pipeline with all enhancements"""
