@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-05-16 07:47:20",
+  "project_id": "clinicaltrials-v1",
+  "service_name": "clinical-trials-pipeline",
+  "region": "us-central1",
+  "url": "https://clinical-trials-pipeline-cnzz4xioxa-uc.a.run.app",
+  "resources": {
+    "memory": "4Gi",
+    "cpu": "2",
+    "timeout": "60m",
+    "concurrency": 80,
+    "min_instances": 0,
+    "max_instances": 5
+  },
+  "bucket_name": "clinicaltrials-v1-clinical-trials",
+  "service_account": "clinical-trials-sa@clinicaltrials-v1.iam.gserviceaccount.com"
+}

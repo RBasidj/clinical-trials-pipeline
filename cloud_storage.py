@@ -4,10 +4,9 @@ import datetime
 from google.cloud import storage
 import logging
 from dotenv import load_dotenv
-load_dotenv()  # Load environment variables from .env file
+load_dotenv()  #  environment variables from .env file
 
 
-# Configure logging
 logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -20,7 +19,6 @@ def initialize_storage():
     try:
         logger.info(f"Initializing Google Cloud Storage with bucket: {BUCKET_NAME}")
         
-        # Look for credentials file in various locations
         cred_locations = [
             os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
             "clinicaltrials-v1-9acf57d456a4.json",  # Current directory
@@ -28,7 +26,6 @@ def initialize_storage():
             "/app/clinicaltrials-v1-9acf57d456a4.json"  # For Cloud Run
         ]
         
-        # Try to find and load credentials
         creds_path = None
         for loc in cred_locations:
             if loc and os.path.exists(loc):
@@ -38,7 +35,6 @@ def initialize_storage():
                 break
         
         if creds_path:
-            # Use explicit credentials
             from google.oauth2 import service_account
             credentials = service_account.Credentials.from_service_account_file(creds_path)
             project_id = credentials.project_id
@@ -46,7 +42,6 @@ def initialize_storage():
             logger.info(f"Creating storage client with explicit credentials for project {project_id}")
             storage_client = storage.Client(credentials=credentials, project=project_id)
         else:
-            # Fall back to default credentials
             logger.info("No explicit credentials found, using default credentials")
             storage_client = storage.Client()
         
@@ -58,13 +53,11 @@ def initialize_storage():
             bucket = storage_client.create_bucket(BUCKET_NAME)
             logger.info(f"Created new bucket: {BUCKET_NAME}")
             
-            # Make bucket public (optional)
             bucket.make_public(future=True)
             logger.info(f"Made bucket {BUCKET_NAME} publicly readable")
         else:
             logger.info(f"Using existing bucket: {BUCKET_NAME}")
             
-        # Verify permissions by doing a simple operation
         try:
             blobs = list(bucket.list_blobs(max_results=1))
             logger.info("Successfully verified bucket access")
@@ -76,7 +69,62 @@ def initialize_storage():
         logger.error(f"Error initializing cloud storage: {e}", exc_info=True)
         return None, None
 
+# cloud_storage.py - Add these functions to help with debugging
 
+def check_result_exists(run_id, filename):
+    """Check if a specific file exists for the run in cloud storage"""
+    try:
+        storage_client, bucket = initialize_storage()
+        if not bucket:
+            return False
+            
+        blob_path = f"{run_id}/results/{filename}"
+        blob = bucket.blob(blob_path)
+        
+        exists = blob.exists()
+        logger.info(f"File check: {blob_path} exists: {exists}")
+        return exists
+    except Exception as e:
+        logger.error(f"Error checking if file exists: {e}")
+        return False
+
+def add_empty_report(run_id):
+    """Create an empty report file if one doesn't exist (for debugging purposes)"""
+    try:
+        storage_client, bucket = initialize_storage()
+        if not bucket:
+            logger.error("Failed to initialize storage for creating empty report")
+            return False
+        
+        # Check if report already exists
+        report_path = f"{run_id}/results/report.md"
+        blob = bucket.blob(report_path)
+        
+        if not blob.exists():
+            logger.warning(f"Report doesn't exist, creating empty placeholder: {report_path}")
+            
+            # Create a simple empty report
+            empty_report = "# Analysis Report (Placeholder)\n\nThis is an automatically generated placeholder report."
+            
+            # Upload the empty report
+            blob.upload_from_string(empty_report)
+            
+            # Generate a signed URL
+            signed_url = blob.generate_signed_url(
+                expiration=datetime.timedelta(hours=24),
+                method="GET"
+            )
+            
+            logger.info(f"Created placeholder report at: {signed_url}")
+            return True
+        else:
+            logger.info(f"Report already exists: {report_path}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error creating empty report: {e}")
+        return False
+        
 def upload_pipeline_outputs(run_id):
     """Upload all pipeline outputs to cloud storage with a specific run ID"""
     logger.info(f"Starting upload of pipeline outputs for run ID: {run_id}")
@@ -105,29 +153,22 @@ def upload_pipeline_outputs(run_id):
                     blob = bucket.blob(cloud_path)
                     logger.info(f"Uploading {local_path} to {cloud_path}")
 
-                    # Upload with retry logic
                     for attempt in range(3):
                         try:
                             blob.upload_from_filename(local_path)
                             
-                            # Instead of make_public(), use IAM policy to make publicly accessible
-                            # or generate a signed URL with longer expiration
                             try:
-                                # Try to make public without ACLs (for uniform bucket-level access)
                                 policy = bucket.get_iam_policy(requested_policy_version=3)
                                 policy.bindings.append({
                                     "role": "roles/storage.objectViewer",
                                     "members": ["allUsers"],
                                 })
                                 bucket.set_iam_policy(policy)
-                                # Use public URL
                                 public_url = f"https://storage.googleapis.com/{bucket.name}/{blob.name}"
                                 file_key = f"{dir_name}/{file_name}"
                                 file_urls[file_key] = public_url
                             except Exception as e:
-                                # Fall back to signed URL with long expiration if public access fails
                                 logger.warning(f"Could not make bucket public, using signed URL: {e}")
-                                # Create a signed URL that's valid for 7 days
                                 signed_url = blob.generate_signed_url(
                                     version="v4",
                                     expiration=datetime.timedelta(days=7),
@@ -191,17 +232,6 @@ def download_pipeline_outputs(run_id, local_dir="downloads"):
         logger.error(f"Error downloading files: {e}")
         return []
 
-## File: cloud_storage.py
-## Location: Replace the get_file_url function completely
-
-## File: cloud_storage.py
-## Location: Replace get_file_url function
-
-## File: cloud_storage.py
-## Location: Update the get_file_url function
-
-## File: cloud_storage.py
-## Location: Update the get_file_url function
 
 def get_file_url(run_id, local_path):
     """Generate a signed URL for accessing a specific file with better error handling"""
@@ -213,10 +243,10 @@ def get_file_url(run_id, local_path):
 
         # Try various path formats
         path_formats = [
-            f"{run_id}/{local_path}",          # Standard path
-            f"{run_id}/{local_path.lstrip('/')}", # Remove leading slash if present
+            f"{run_id}/{local_path}",          #  path
+            f"{run_id}/{local_path.lstrip('/')}", #  leading slash if present
             local_path,                        # Direct path without run_id
-            f"{run_id}/{os.path.basename(local_path)}"  # Just the filename with run_id
+            f"{run_id}/{os.path.basename(local_path)}"  
         ]
         
         # Try each path format

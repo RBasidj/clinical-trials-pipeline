@@ -1,0 +1,272 @@
+2025-05-16 07:54:13,737 - visualization-test - INFO - === Starting Visualization Debug Tests ===
+2025-05-16 07:54:13,737 - visualization-test - INFO - Testing matplotlib backend...
+2025-05-16 07:54:13,737 - visualization-test - INFO - Available matplotlib backends: ['gtk3agg', 'gtk3cairo', 'gtk4agg', 'gtk4cairo', 'macosx', 'nbagg', 'notebook', 'qtagg', 'qtcairo', 'qt5agg', 'qt5cairo', 'tkagg', 'tkcairo', 'webagg', 'wx', 'wxagg', 'wxcairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template']
+2025-05-16 07:54:13,754 - visualization-test - INFO - Current matplotlib backend: macosx
+2025-05-16 07:54:13,956 - visualization-test - INFO - ✅ Successfully created test plot (25647 bytes): test_plot.png
+2025-05-16 07:54:13,956 - visualization-test - INFO - Testing visualization module...
+2025-05-16 07:54:13,960 - visualization-test - INFO - Calling create_visualizations with test data to test_figures
+2025-05-16 07:54:13,960 - visualization - INFO - Starting visualization generation in test_figures
+2025-05-16 07:54:13,961 - visualization - INFO - Using matplotlib backend: Agg
+2025-05-16 07:54:13,961 - visualization - INFO - Creating modality distribution pie chart
+2025-05-16 07:54:14,241 - visualization - INFO - Saved test_figures/modality_distribution.png (size: 159202 bytes)
+2025-05-16 07:54:14,241 - visualization - INFO - Creating trial timeline visualization
+2025-05-16 07:54:14,566 - visualization - INFO - Saved test_figures/trial_timeline.png (size: 85309 bytes)
+2025-05-16 07:54:14,566 - visualization - INFO - Creating enrollment distribution visualization
+2025-05-16 07:54:14,812 - visualization - INFO - Saved test_figures/enrollment_distribution.png (size: 90141 bytes)
+2025-05-16 07:54:14,813 - visualization - INFO - Creating duration vs enrollment scatter plot
+2025-05-16 07:54:15,038 - visualization - INFO - Saved test_figures/duration_vs_enrollment.png (size: 105202 bytes)
+2025-05-16 07:54:15,038 - visualization - INFO - Creating top sponsors bar chart
+2025-05-16 07:54:15,290 - visualization - INFO - Saved test_figures/top_sponsors.png (size: 88224 bytes)
+2025-05-16 07:54:15,290 - visualization - INFO - Creating target distribution chart
+2025-05-16 07:54:15,504 - visualization - INFO - Saved test_figures/target_distribution.png (size: 87903 bytes)
+2025-05-16 07:54:15,504 - visualization - INFO - Verified file test_figures/modality_distribution.png exists (size: 159202 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Verified file test_figures/trial_timeline.png exists (size: 85309 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Verified file test_figures/enrollment_distribution.png exists (size: 90141 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Verified file test_figures/duration_vs_enrollment.png exists (size: 105202 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Verified file test_figures/top_sponsors.png exists (size: 88224 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Verified file test_figures/target_distribution.png exists (size: 87903 bytes)
+2025-05-16 07:54:15,505 - visualization - INFO - Created 6 visualizations in test_figures
+2025-05-16 07:54:15,505 - visualization-test - INFO - ✅ Successfully created 6 visualization files
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/modality_distribution.png (159202 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/trial_timeline.png (85309 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/enrollment_distribution.png (90141 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/duration_vs_enrollment.png (105202 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/top_sponsors.png (88224 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO -   - test_figures/target_distribution.png (87903 bytes)
+2025-05-16 07:54:15,505 - visualization-test - INFO - Testing cloud storage...
+2025-05-16 07:54:15,768 - visualization-test - INFO - Testing direct authentication with: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:15,769 - visualization-test - INFO - Project ID from credentials: clinicaltrials-v1
+2025-05-16 07:54:16,339 - visualization-test - INFO - Direct upload successful
+2025-05-16 07:54:16,339 - visualization-test - INFO - Testing upload_pipeline_outputs for run_id: debug_run
+2025-05-16 07:54:16,339 - cloud_storage - INFO - Starting upload of pipeline outputs for run ID: debug_run
+2025-05-16 07:54:16,339 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:16,339 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:16,339 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:16,341 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:16,341 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:16,341 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:16,587 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:16,661 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:16,662 - cloud_storage - INFO - Processing directory: data
+2025-05-16 07:54:16,663 - cloud_storage - INFO - Found 2 files in data
+2025-05-16 07:54:16,663 - cloud_storage - INFO - Uploading data/clinical_trials.csv to debug_run/data/clinical_trials.csv
+2025-05-16 07:54:17,423 - cloud_storage - INFO - Successfully uploaded and shared data/clinical_trials.csv
+2025-05-16 07:54:17,425 - cloud_storage - INFO - Uploading data/interventions.csv to debug_run/data/interventions.csv
+2025-05-16 07:54:18,184 - cloud_storage - INFO - Successfully uploaded and shared data/interventions.csv
+2025-05-16 07:54:18,185 - cloud_storage - INFO - Processing directory: results
+2025-05-16 07:54:18,185 - cloud_storage - INFO - Found 3 files in results
+2025-05-16 07:54:18,185 - cloud_storage - INFO - Uploading results/summary.json to debug_run/results/summary.json
+2025-05-16 07:54:19,002 - cloud_storage - INFO - Successfully uploaded and shared results/summary.json
+2025-05-16 07:54:19,004 - cloud_storage - INFO - Uploading results/report.md to debug_run/results/report.md
+2025-05-16 07:54:19,617 - cloud_storage - INFO - Successfully uploaded and shared results/report.md
+2025-05-16 07:54:19,618 - cloud_storage - INFO - Uploading results/report.txt to debug_run/results/report.txt
+2025-05-16 07:54:20,250 - cloud_storage - INFO - Successfully uploaded and shared results/report.txt
+2025-05-16 07:54:20,250 - cloud_storage - INFO - Processing directory: figures
+2025-05-16 07:54:20,251 - cloud_storage - INFO - Found 9 files in figures
+2025-05-16 07:54:20,251 - cloud_storage - INFO - Uploading figures/enrollment_distribution_with_outliers.png to debug_run/figures/enrollment_distribution_with_outliers.png
+2025-05-16 07:54:20,914 - cloud_storage - INFO - Successfully uploaded and shared figures/enrollment_distribution_with_outliers.png
+2025-05-16 07:54:20,915 - cloud_storage - INFO - Uploading figures/duration_vs_enrollment.png to debug_run/figures/duration_vs_enrollment.png
+2025-05-16 07:54:21,564 - cloud_storage - INFO - Successfully uploaded and shared figures/duration_vs_enrollment.png
+2025-05-16 07:54:21,564 - cloud_storage - INFO - Uploading figures/test_cloud_storage.png to debug_run/figures/test_cloud_storage.png
+2025-05-16 07:54:22,177 - cloud_storage - INFO - Successfully uploaded and shared figures/test_cloud_storage.png
+2025-05-16 07:54:22,178 - cloud_storage - INFO - Uploading figures/modality_distribution.png to debug_run/figures/modality_distribution.png
+2025-05-16 07:54:22,894 - cloud_storage - INFO - Successfully uploaded and shared figures/modality_distribution.png
+2025-05-16 07:54:22,894 - cloud_storage - INFO - Uploading figures/target_distribution.png to debug_run/figures/target_distribution.png
+2025-05-16 07:54:23,714 - cloud_storage - INFO - Successfully uploaded and shared figures/target_distribution.png
+2025-05-16 07:54:23,714 - cloud_storage - INFO - Uploading figures/duration_vs_enrollment_with_outliers.png to debug_run/figures/duration_vs_enrollment_with_outliers.png
+2025-05-16 07:54:24,532 - cloud_storage - INFO - Successfully uploaded and shared figures/duration_vs_enrollment_with_outliers.png
+2025-05-16 07:54:24,533 - cloud_storage - INFO - Uploading figures/top_sponsors.png to debug_run/figures/top_sponsors.png
+2025-05-16 07:54:25,250 - cloud_storage - INFO - Successfully uploaded and shared figures/top_sponsors.png
+2025-05-16 07:54:25,251 - cloud_storage - INFO - Uploading figures/enrollment_distribution.png to debug_run/figures/enrollment_distribution.png
+2025-05-16 07:54:26,783 - cloud_storage - INFO - Successfully uploaded and shared figures/enrollment_distribution.png
+2025-05-16 07:54:26,784 - cloud_storage - INFO - Uploading figures/trial_timeline.png to debug_run/figures/trial_timeline.png
+2025-05-16 07:54:27,502 - cloud_storage - INFO - Successfully uploaded and shared figures/trial_timeline.png
+2025-05-16 07:54:27,502 - cloud_storage - INFO - Completed uploading 14 files for run ID: debug_run
+2025-05-16 07:54:27,502 - visualization-test - INFO - ✅ Uploaded 14 files to Cloud Storage:
+2025-05-16 07:54:27,502 - visualization-test - INFO -   - data/clinical_trials.csv: https://storage.googleapis.com/clinicaltrialsv1/debug_run/data/clinical_trials.csv
+2025-05-16 07:54:27,502 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:27,502 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:27,502 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:27,505 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:27,505 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:27,505 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:27,751 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:27,880 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:27,880 - cloud_storage - INFO - Trying path: debug_run/data/clinical_trials.csv
+2025-05-16 07:54:27,951 - cloud_storage - INFO - Found blob at path: debug_run/data/clinical_trials.csv
+2025-05-16 07:54:28,007 - cloud_storage - INFO - Generated signed URL for debug_run/data/clinical_trials.csv valid for 7 days
+2025-05-16 07:54:28,008 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/data/clinical_trials.csv?Expires=1748001267&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=ikLNlnGv6cppHEwyChvkBdLF1sgs%2FWOrGjslmbxoSRw5d1hQ0UlNrugX6beb0C3Aj5nf%2B44a%2BTIpYFWVLHhSdiVv5xfoKGXPqudbBVW7QtA6NXchrpkOOjvPOaAPmARg3ZtSbFEy27d1FKmek%2BtHuUt3PumtNlFtRvKKkTcw7xVyRkqUQPz9ksto%2FmnOoYR9yWz01w3YifG0rCT0SD62IZbhR4eTbEG5u0N9w0VfDwJAC%2BpboxHQrrT143pGrHOn4EQISKXinvWo7I6fi%2Bak4BXVbVvYOlZ1xZ0gckQee6GrmnTUV9nrPnA%2FNa8st%2Fb806pZQ6rwuo3RDyANMP5IEw%3D%3D
+2025-05-16 07:54:28,008 - visualization-test - INFO -   - data/interventions.csv: https://storage.googleapis.com/clinicaltrialsv1/debug_run/data/interventions.csv
+2025-05-16 07:54:28,008 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:28,008 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,008 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,009 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:28,009 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:28,009 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:28,271 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:28,426 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:28,426 - cloud_storage - INFO - Trying path: debug_run/data/interventions.csv
+2025-05-16 07:54:28,492 - cloud_storage - INFO - Found blob at path: debug_run/data/interventions.csv
+2025-05-16 07:54:28,553 - cloud_storage - INFO - Generated signed URL for debug_run/data/interventions.csv valid for 7 days
+2025-05-16 07:54:28,553 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/data/interventions.csv?Expires=1748001268&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=DwGPvunmcPtXu%2Bgaw5pYIKa%2FmYi2fWXam3xwHRmpD81Pl3RQvnSL7%2F2o8pWaOCE6awTCq5J2%2BxPrbcL4sceh1RFl8NmBdXRVSvTEE2CdY837hpxYQlSQf%2Fbw71KFF61z8UX4qwj2pQcoYVc96bHJQaun%2BzijhiRGCmbQTejfVizwLE8G5p%2FiQZkxc53nQLR2IumcwY9Z3vVJ6P1ZrSxokAFcNqFLLZPoHonlNTSPRoKpKHPKKt7QPBfgkeMh2z5ass4wDI86tjF7yp4QbHZhCSrUuLYs%2Faz2%2FyCAnmbtn84GBY3nAxfDsgz1qFL4jZRJlC5KXRQqRBDSSzeDB7%2FTaw%3D%3D
+2025-05-16 07:54:28,553 - visualization-test - INFO -   - results/summary.json: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/summary.json
+2025-05-16 07:54:28,553 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:28,554 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,554 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,555 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:28,555 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:28,555 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:28,779 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:28,848 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:28,849 - cloud_storage - INFO - Trying path: debug_run/results/summary.json
+2025-05-16 07:54:28,912 - cloud_storage - INFO - Found blob at path: debug_run/results/summary.json
+2025-05-16 07:54:28,968 - cloud_storage - INFO - Generated signed URL for debug_run/results/summary.json valid for 7 days
+2025-05-16 07:54:28,968 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/summary.json?Expires=1748001268&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=mSupbvDwfsphVNRk8oBmndOq3ZXN4XuBrOm%2B%2F%2BxC%2BLcXlnYnQg7unOvXXlYRSMQZ8QPi%2BojpGqpduRCjupV%2BlSDVrjgDz2pCwPjjnZmgjFnpz3ihWeoiQsDvlWydwmPoQv%2F1tDC4mqZFSsh2P41KspOtOxJKtCLhjvY5qFr5hs0ivI3KLbfQdmi8S4bRz9o1XoJlNCppyDVzaoSCCE2vqQz4VFIS0wRAnrjRG1x1zzT3TVzCSwlXyCtoauo%2FhOsZGmbF539fAT%2F9dk%2FPMbC4TKt2KHnCSdKuweYAUE7ewlWQq%2FeRt9e9SrtwB5SgpQqTHKumsWmFQ2FQEVGFvPhNmw%3D%3D
+2025-05-16 07:54:28,968 - visualization-test - INFO -   - results/report.md: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/report.md
+2025-05-16 07:54:28,968 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:28,969 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,969 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:28,970 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:28,970 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:28,970 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:29,203 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:29,341 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:29,341 - cloud_storage - INFO - Trying path: debug_run/results/report.md
+2025-05-16 07:54:29,408 - cloud_storage - INFO - Found blob at path: debug_run/results/report.md
+2025-05-16 07:54:29,464 - cloud_storage - INFO - Generated signed URL for debug_run/results/report.md valid for 7 days
+2025-05-16 07:54:29,464 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/report.md?Expires=1748001269&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=ugbv9D1VQSAyrSj%2FAjBlW%2BnMMS%2BQtQLQW6FOplQ3dUSbkTjZkB5ulrtsrikIycJ8OwOVzmkIvYZmf4XnNpThdtqY5ZyhloZucDNN8x2pBBABAANEp1chcjrdDQiZRqUBbKa3D%2FIk83vKTESgqpmp6ei9MivIRwFlGnX3eCVNqz7qXBW1fDE%2F7J1CgcjJ1d%2F6SFqD%2FQFEBsfgPdsXKtf1D34bb0J8zN8fyX%2FAYwtM%2BsGDlmaUzAwxAVghHNYhGBAg5ws%2B%2BS9HLdWqSMEfHqPbTug%2Fr42YdEd6YX2KYaHF1Nl0sTrTqE3sesxqa%2FTqoIF13bTAMQ5vp%2FaMlQKA3ur42g%3D%3D
+2025-05-16 07:54:29,464 - visualization-test - INFO -   - results/report.txt: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/report.txt
+2025-05-16 07:54:29,464 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:29,464 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:29,464 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:29,465 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:29,465 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:29,465 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:29,696 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:29,764 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:29,765 - cloud_storage - INFO - Trying path: debug_run/results/report.txt
+2025-05-16 07:54:29,825 - cloud_storage - INFO - Found blob at path: debug_run/results/report.txt
+2025-05-16 07:54:29,880 - cloud_storage - INFO - Generated signed URL for debug_run/results/report.txt valid for 7 days
+2025-05-16 07:54:29,880 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/results/report.txt?Expires=1748001269&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=O0HbMZOy0mlaj9CZsy%2B%2FyXff7zSpK3aS1KzBuX6%2BTNxDFHeQblAhmrD2%2BELxyv%2BzKwKwM7TLGCrhgo1iAGPKlpzlBWFncfp9HHrgz%2BDMCMW1jPZk2miShbzmQmVTkWgLf7W1fvenScxYXRVVsyjhlNg5Ipp6RP1CHMdxcoFNDwKgeyLmuiS62Aljgk9bg5K8q%2FJ16DxuDfMSoyW%2FBuBlHiPwUHf0kSXaNLF2mSNwxQ1gSAMdbge88lR20ca0N0sCSuAqq0uZU8PO6RK5xgIMkawVfhvqQa1xmDSg4E4hXqE%2FjlUXGMEVladKZQ1aE%2BHstJ2fICEb6TAf0f261%2BVzAQ%3D%3D
+2025-05-16 07:54:29,880 - visualization-test - INFO -   - figures/enrollment_distribution_with_outliers.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/enrollment_distribution_with_outliers.png
+2025-05-16 07:54:29,880 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:29,880 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:29,881 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:29,882 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:29,882 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:29,882 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:30,105 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:30,242 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:30,243 - cloud_storage - INFO - Trying path: debug_run/figures/enrollment_distribution_with_outliers.png
+2025-05-16 07:54:30,311 - cloud_storage - INFO - Found blob at path: debug_run/figures/enrollment_distribution_with_outliers.png
+2025-05-16 07:54:30,375 - cloud_storage - INFO - Generated signed URL for debug_run/figures/enrollment_distribution_with_outliers.png valid for 7 days
+2025-05-16 07:54:30,375 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/enrollment_distribution_with_outliers.png?Expires=1748001270&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=I7cfG9og1ubWbXXuK7jgv1TechQbFMEKyFwdQ0%2FubNxJaJbjAxZMyxoE4Y3%2F0ZyrfJV39AsfaaA65%2BlNRJt0rAsIFwMgATTLI60ADPcQW%2FW3aSDYWkRIun%2BwuXoQVnPRp2zMPCm0rLcC2rcJs7NtHjXgUHFdskjoThNYi8Fp%2BN07jYT5ufgTy6kWbj5WHMumgp93XRTUr8399ToMpkFy5URSckQJOKK16v4t7W8DpIX3Z5M2p9vZ2QQO654iZuCoMJSpiOQuqk8AWVydMbmwiaX7v3NrEBhzX3EB4eIhCQaXwL%2F%2B6XOtEQTtRIewv8rvfMERu%2F4TcGU2tJdj%2BsQN9A%3D%3D
+2025-05-16 07:54:30,375 - visualization-test - INFO -   - figures/duration_vs_enrollment.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/duration_vs_enrollment.png
+2025-05-16 07:54:30,375 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:30,375 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:30,375 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:30,376 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:30,376 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:30,377 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:30,621 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:30,759 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:30,759 - cloud_storage - INFO - Trying path: debug_run/figures/duration_vs_enrollment.png
+2025-05-16 07:54:30,866 - cloud_storage - INFO - Found blob at path: debug_run/figures/duration_vs_enrollment.png
+2025-05-16 07:54:30,937 - cloud_storage - INFO - Generated signed URL for debug_run/figures/duration_vs_enrollment.png valid for 7 days
+2025-05-16 07:54:30,937 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/duration_vs_enrollment.png?Expires=1748001270&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=tM0V29vww5JoZJfcfNA%2BJ8byP3OdtVrPmStXHckXJVelTs2uoozPZFtMBqkg2nbO7EBaepiRAE7BpraB8z0RwEnDRmWsPKcZIT3IgHjuxezkCAs7ihGIm8bP8qKUJOiA4vLp7gau%2BFWNlcOCY1kHm5w7srQbxFk7YQrH7HrajKbpn2N27KyG7Wc0PTw1MAc%2BHnVt2O1AQ2V6sFJJm5eiDyuIUxSdyPCToaQTIU4BygXB%2FGV%2F6zruEeALccWHiyYB30SMn95xjhyKQnj72rNuMNCF8Tqw0%2FCbFGxbFUrWRa37UK30JEkMQIeDCGQBTPOhm8D%2BiIkKOu5oVa3qIN703Q%3D%3D
+2025-05-16 07:54:30,937 - visualization-test - INFO -   - figures/test_cloud_storage.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/test_cloud_storage.png
+2025-05-16 07:54:30,937 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:30,937 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:30,937 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:30,939 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:30,939 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:30,939 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:31,161 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:31,223 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:31,223 - cloud_storage - INFO - Trying path: debug_run/figures/test_cloud_storage.png
+2025-05-16 07:54:31,290 - cloud_storage - INFO - Found blob at path: debug_run/figures/test_cloud_storage.png
+2025-05-16 07:54:31,359 - cloud_storage - INFO - Generated signed URL for debug_run/figures/test_cloud_storage.png valid for 7 days
+2025-05-16 07:54:31,359 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/test_cloud_storage.png?Expires=1748001271&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=G768UavdUIsWC823bHsJq%2B1tkRIwBfJaNAhw23lqemQydKMXcgwpcgQ3EgB9c36hr9Tsq9A2UAidbi0CPYPLaTCJ0A8cEGXDwqmzPMEaSgh02FapVnZeKPzxlj64Pkjw4N%2FtiMXsXby0xGOQeKDMI57L8m9l4Q6Vm32pjoyBGiZJ2PaOfUB%2FYSL8SvRGFLzR3e%2FHhzmiCFBm%2Ff%2ByJ%2B7utwYrF71NbFfrfapnNbHdjXJ%2FIDbGNrGzveddcE6CWvbTgi%2Bautb5yiE0iWEWyujeJqlEsYvKlGXw37fNGCo3LPVLPnw4MKqQWNKFg7ofuuFBFSYmiQjNlQeF6UFLKdNYjw%3D%3D
+2025-05-16 07:54:31,359 - visualization-test - INFO -   - figures/modality_distribution.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/modality_distribution.png
+2025-05-16 07:54:31,359 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:31,359 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:31,359 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:31,360 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:31,360 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:31,360 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:31,592 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:31,722 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:31,723 - cloud_storage - INFO - Trying path: debug_run/figures/modality_distribution.png
+2025-05-16 07:54:31,792 - cloud_storage - INFO - Found blob at path: debug_run/figures/modality_distribution.png
+2025-05-16 07:54:31,847 - cloud_storage - INFO - Generated signed URL for debug_run/figures/modality_distribution.png valid for 7 days
+2025-05-16 07:54:31,847 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/modality_distribution.png?Expires=1748001271&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=IVHlwEMOgXj%2Fj7X%2FJoH9lrgqSiSs3VWdZDVM4vJN0lTeLyp8pqwRgnnmU45a8YkJjGD9sUPeEUFeQKuNlekcOK8qAAfHneUAZCP8CnsxR703QlYiDmuq2S0bCF7%2FE8CCCGuo8Av8WpgpYuXmiur7R9IPbVi%2Bn0YeBuCWBL48zy9PxCxhFsAtwZ3Z9hUjPHik6BsvUFZiQBvLTeVRtapvwRTM0RNxd8iKi67aKgc%2Bpaa%2FQEsyof5ZhbOpnARHH8aqasT4O7DMpG5wzW5NQFTxnnmj%2BzvMqCoBLubBJ%2B0k%2Fdx1njZDZcRPbyzHGBS7mQIgAqtCL9DStzBbeXi5l3X%2B%2FQ%3D%3D
+2025-05-16 07:54:31,847 - visualization-test - INFO -   - figures/target_distribution.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/target_distribution.png
+2025-05-16 07:54:31,847 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:31,847 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:31,847 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:31,848 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:31,848 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:31,848 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:32,078 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:32,208 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:32,208 - cloud_storage - INFO - Trying path: debug_run/figures/target_distribution.png
+2025-05-16 07:54:32,272 - cloud_storage - INFO - Found blob at path: debug_run/figures/target_distribution.png
+2025-05-16 07:54:32,340 - cloud_storage - INFO - Generated signed URL for debug_run/figures/target_distribution.png valid for 7 days
+2025-05-16 07:54:32,340 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/target_distribution.png?Expires=1748001272&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=EJatd6m%2B8gkg60V3zW4OkWOcyBnqicaNvP%2BtsRzkNJRd9SmTEMNNOoHiq4OQG%2BUsmC6tH%2FRUDEM%2BXLkuS3EePqtvcHw2X8mUpAhAgB%2Bj0jd6VAtO7Q0m6x86rEkwnvQx62bJErIZBEqWKC00NXby3DECE6IIzhwjEWtaDAxQldP1DSiX%2BeQ%2Bkv9NjNPUXW9nyeRh9eXmPyHkOTIx9%2B2M6GYwi00ClDjrEMsAB0zi0DhnQoe6iUo8XFWg%2BscdBUrmaEvCHWNiOftErdxhSjKcd%2B36bIISS4O7NChCESfzXhjRzaWmigZ92khl8VRf%2FkoHlu6Vakox%2FB5d0d130ZLL0A%3D%3D
+2025-05-16 07:54:32,340 - visualization-test - INFO -   - figures/duration_vs_enrollment_with_outliers.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/duration_vs_enrollment_with_outliers.png
+2025-05-16 07:54:32,340 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:32,340 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:32,340 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:32,342 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:32,342 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:32,342 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:32,570 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:32,701 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:32,701 - cloud_storage - INFO - Trying path: debug_run/figures/duration_vs_enrollment_with_outliers.png
+2025-05-16 07:54:32,766 - cloud_storage - INFO - Found blob at path: debug_run/figures/duration_vs_enrollment_with_outliers.png
+2025-05-16 07:54:32,830 - cloud_storage - INFO - Generated signed URL for debug_run/figures/duration_vs_enrollment_with_outliers.png valid for 7 days
+2025-05-16 07:54:32,830 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/duration_vs_enrollment_with_outliers.png?Expires=1748001272&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=zmIHyeOTgZLMrf0qVybAacOS8UzbucAky40ivMK1Wqqu4rFQY2SynSR6J6vcVSW2anc2zrL6lKsKPow8IsKx3OODp%2BmfmWpA4tRRMv85%2F9pfTq1UZjvwzJRjRBdLdH7NjYqWb605gJ5BdidYMr%2FkH5L8oWeGoeKjvGwLJ9%2BAtVs7rjst%2FChYwjCSbTBxwqn78AxIBIF6oq4vZW8ibYqK7KjrwLqOMevu17wPbvCkU6HEToHTZ9ilCtqIXFGH3yNNqcOCWlpL2D9ERwXXrnjCn8ndxqmlpYic0Bpg18KtJ%2F1lf2dRzy9JLzC7g4CTVp1T3Zz7Hwu6yZcendNOGp3VdA%3D%3D
+2025-05-16 07:54:32,830 - visualization-test - INFO -   - figures/top_sponsors.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/top_sponsors.png
+2025-05-16 07:54:32,830 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:32,830 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:32,830 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:32,831 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:32,831 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:32,831 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:33,053 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:33,141 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:33,141 - cloud_storage - INFO - Trying path: debug_run/figures/top_sponsors.png
+2025-05-16 07:54:33,208 - cloud_storage - INFO - Found blob at path: debug_run/figures/top_sponsors.png
+2025-05-16 07:54:33,270 - cloud_storage - INFO - Generated signed URL for debug_run/figures/top_sponsors.png valid for 7 days
+2025-05-16 07:54:33,270 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/top_sponsors.png?Expires=1748001273&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=kONteeZb09UzTOMvjiNVoM55oEswe9Xz%2BzFOp7zrGKExmzeBRs1CUt1%2B5C6K2FOec74vEcd2FFugfftcmlnfHkxiSzihF9lYSCKZnljBdrxVFk28gcSrF2kyzJuDfkbz4MZquFXDdDM8HCiINpb%2BLMeT5YNgaqR7XjSTbNmCoWRNrxnm71JVSTao%2BxKZcxN8hQU6GFDWgBBRTpGwQC3BtfH36Nk%2BfH6hnVv1zeYaMaCkiyh65n3OFoGBp33Xk4MRFhk66AYb%2Btaj80p%2BQXP5EIgfFV6uUnFC%2FcCE9HNTniN7wryMryrOSj3UsIeTY%2BkqbALrwvQi4rfpDpjI0hlnvA%3D%3D
+2025-05-16 07:54:33,270 - visualization-test - INFO -   - figures/enrollment_distribution.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/enrollment_distribution.png
+2025-05-16 07:54:33,270 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:33,271 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:33,271 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:33,272 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:33,272 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:33,272 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:33,494 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:33,633 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:33,634 - cloud_storage - INFO - Trying path: debug_run/figures/enrollment_distribution.png
+2025-05-16 07:54:33,705 - cloud_storage - INFO - Found blob at path: debug_run/figures/enrollment_distribution.png
+2025-05-16 07:54:33,777 - cloud_storage - INFO - Generated signed URL for debug_run/figures/enrollment_distribution.png valid for 7 days
+2025-05-16 07:54:33,777 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/enrollment_distribution.png?Expires=1748001273&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=v8WLWraRnfgnSbDrTmCRereNbkTY2ymhcJ8cnv%2BjY7CAMDSb5laJ9cE6sYvMC4moSyjRWfHzvRh4Zwkdxl6xn5ZCDhHqdkce6MUo488FzP5%2BkuNpSySl%2BYkhwP3gKPFU3ntROfckna47UmboBzDm%2Bxnh6ngXCdHCpKLjUVxfFflaD8vzQ1ee67Qfvg7aBa4U0iNiED4mFJpP13fuRyKSoxdIr%2B9pEd6U3TZrlTdprPv6BEgltbwlzOzkdB5cBVnWWj%2Bby26MYsXg0iyfY%2FGnHZvzVDF4US%2F4cBYBxE94BK7i5zUOdaG9SJ%2FEmpJRuO2Osm8DPqGG%2BrHDsuZQRLSZoQ%3D%3D
+2025-05-16 07:54:33,777 - visualization-test - INFO -   - figures/trial_timeline.png: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/trial_timeline.png
+2025-05-16 07:54:33,777 - cloud_storage - INFO - Initializing Google Cloud Storage with bucket: clinicaltrialsv1
+2025-05-16 07:54:33,777 - cloud_storage - INFO - Looking for credentials at: /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:33,777 - cloud_storage - INFO - Loading credentials from /Users/rodmehrbasidj/Documents/TrialsV2/CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+2025-05-16 07:54:33,778 - cloud_storage - INFO - Loaded credentials for project: clinicaltrials-v1
+2025-05-16 07:54:33,778 - cloud_storage - INFO - Creating storage client with explicit credentials for project clinicaltrials-v1
+2025-05-16 07:54:33,778 - cloud_storage - INFO - Checking if bucket clinicaltrialsv1 exists
+2025-05-16 07:54:34,009 - cloud_storage - INFO - Using existing bucket: clinicaltrialsv1
+2025-05-16 07:54:34,136 - cloud_storage - INFO - Successfully verified bucket access
+2025-05-16 07:54:34,136 - cloud_storage - INFO - Trying path: debug_run/figures/trial_timeline.png
+2025-05-16 07:54:34,204 - cloud_storage - INFO - Found blob at path: debug_run/figures/trial_timeline.png
+2025-05-16 07:54:34,271 - cloud_storage - INFO - Generated signed URL for debug_run/figures/trial_timeline.png valid for 7 days
+2025-05-16 07:54:34,271 - visualization-test - INFO -   - Retrieved URL: https://storage.googleapis.com/clinicaltrialsv1/debug_run/figures/trial_timeline.png?Expires=1748001274&GoogleAccessId=clinical-service-account%40clinicaltrials-v1.iam.gserviceaccount.com&Signature=i58ny%2FVnldW7RZXrlWaINv1H4PrVnUeyHV4XtPdLSdWQY9hAdbmXBAoTdR0wRWKzkTzR2WcYeCLGYTLGBpSSixNy6lxcvRFsyM7mOR2IXpqD2rVPPXzIEV%2B139qOdCKBOJ0tPlNJD5ZM4BWJDLiIK2Whcq2EKJLFPCpXPqc4ke7qcvKxU4Lik4dBP86EJHdg4PoKA4%2B43heY7yqmpR6pzTjbC5DH5zy9Ya1mVujtXY0%2FdPk%2BHsdd1mGYQ6XmbxKQQTiXQCvzax3f979reP2elxCWBbXP3sJCLnVE70TVYNDeMBOZFjUQ7ruIQ72UKzf20p0WagyF7VJEo5sk7jn%2F2Q%3D%3D
+2025-05-16 07:54:34,271 - visualization-test - INFO - === Test Summary ===
+2025-05-16 07:54:34,271 - visualization-test - INFO - matplotlib_backend: ✅ PASS
+2025-05-16 07:54:34,271 - visualization-test - INFO - visualization_module: ✅ PASS
+2025-05-16 07:54:34,271 - visualization-test - INFO - cloud_storage: ✅ PASS
+2025-05-16 07:54:34,271 - visualization-test - INFO - Essential tests passed! Continue with local development.

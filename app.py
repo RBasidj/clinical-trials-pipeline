@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from cloud_storage import upload_pipeline_outputs, download_pipeline_outputs, get_file_url
 import logging
 import threading
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -132,6 +133,58 @@ def run_analysis():
     thread.daemon = True
     thread.start()
     
+    # Add to the run_analysis function in app.py, right before returning the redirect
+
+    # Add timeout handling and report verification
+    report_timeout = 30  # seconds
+    start_check_time = time.time()
+    report_found = False
+
+    # Check if the report has been generated
+    report_path = os.path.join('results', 'report.md')
+    while time.time() - start_check_time < report_timeout:
+        if os.path.exists(report_path):
+            report_size = os.path.getsize(report_path)
+            print(f"Final report found: {report_path} (size: {report_size} bytes)")
+            report_found = True
+            break
+        else:
+            print(f"Waiting for report generation... ({int(time.time() - start_check_time)} seconds elapsed)")
+            time.sleep(2)
+
+    if not report_found:
+        print(f"WARNING: Report not found after {report_timeout} seconds. Proceeding anyway.")
+        
+        # Create a fallback report if needed
+        try:
+            with open(report_path, 'w') as f:
+                f.write("# Analysis Report\n\n")
+                f.write(f"This is a fallback report for {disease}.\n\n")
+                f.write("The detailed report generation timed out, but the analysis data is still available.\n")
+            print(f"Created fallback report at {report_path}")
+        except Exception as e:
+            print(f"Error creating fallback report: {e}")
+
+    # Check all output files
+    for directory in ['data', 'results', 'figures']:
+        if os.path.exists(directory):
+            files = os.listdir(directory)
+            print(f"Files in {directory}: {', '.join(files)}")
+        else:
+            print(f"Directory not found: {directory}")
+
+    # Add debugging information to the run info
+    runs[run_id]['debug_info'] = {
+        'report_found': report_found,
+        'execution_time': time.time() - runs[run_id].get('start_time_epoch', 0),
+        'files_found': {
+            'data': os.path.exists(os.path.join('data', 'clinical_trials.csv')),
+            'interventions': os.path.exists(os.path.join('data', 'interventions.csv')),
+            'summary': os.path.exists(os.path.join('results', 'summary.json')),
+            'report': os.path.exists(os.path.join('results', 'report.md'))
+        }
+    }
+
     # Immediately redirect to the progress page
     return redirect(url_for('progress', run_id=run_id))
     
@@ -324,7 +377,42 @@ app.jinja_env.globals.update(get_local_files=get_local_files)
 @app.route('/files/<path:filename>')
 def files(filename):
     return send_from_directory('results', filename)
-
+    
+@app.route('/api/debug_report/<run_id>', methods=['GET'])
+def debug_report(run_id):
+    """Endpoint to debug and fix report generation issues"""
+    if run_id not in runs:
+        return jsonify({'status': 'not_found', 'message': f'Run ID {run_id} not found'}), 404
+    
+    run_info = runs[run_id]
+    
+    # Check if report exists in cloud storage
+    from cloud_storage import check_result_exists, add_empty_report
+    
+    report_exists = check_result_exists(run_id, 'report.md')
+    
+    # If report doesn't exist, create an empty one
+    if not report_exists:
+        success = add_empty_report(run_id)
+        if success:
+            return jsonify({
+                'status': 'fixed',
+                'message': 'Created placeholder report',
+                'run_id': run_id
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to create placeholder report',
+                'run_id': run_id
+            })
+    
+    return jsonify({
+        'status': 'ok',
+        'message': 'Report already exists',
+        'run_id': run_id
+    })
+    
 @app.route('/figures/<path:filename>')
 def figures(filename):
     return send_from_directory('figures', filename)
