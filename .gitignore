@@ -2,7 +2,8 @@
 .env
 *.pem
 servicekey.json
-
+CleanTrialsV2/clinicaltrials-v1-9acf57d456a4.json
+clinicaltrials-v1-9acf57d456a4.json
 # Cache files
 __pycache__/
 *.py[cod]
