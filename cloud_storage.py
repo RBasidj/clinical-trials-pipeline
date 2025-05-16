@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 BUCKET_NAME = os.environ.get("CLOUD_STORAGE_BUCKET", "clinicaltrialsv1")
 LOCAL_OUTPUT_DIRS = ["data", "results", "figures"]
 
-# In cloud_storage.py, modify the initialize_storage function to use your new key file:
+# my new key file: IF YOU ARE TRYING TO IMPLEMENT NON-LOCALLY YOU NEED A KEY!
 
 def initialize_storage():
     """Initialize Google Cloud Storage client with better error handling and logging"""
     try:
         logger.info(f"Initializing Google Cloud Storage with bucket: {BUCKET_NAME}")
         
-        # Add your new key file to the list of possible credential locations
+        #  key file to the list of possible credential locations
         cred_locations = [
             os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
             "clinicaltrials-v1-5c24014c74c9.json",  # Your new key file
@@ -47,7 +47,7 @@ def initialize_storage():
             storage_client = storage.Client(credentials=credentials, project=project_id)
         else:
             logger.warning("No explicit credentials found, using default credentials")
-            # Try to use the new environment variable directly if file not found
+            #  use the new environment variable directly if file not found
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "clinicaltrials-v1-5c24014c74c9.json"
             try:
                 storage_client = storage.Client()
@@ -79,8 +79,7 @@ def initialize_storage():
         logger.error(f"Error initializing cloud storage: {e}", exc_info=True)
         return None, None
 
-# cloud_storage.py - Add these functions to help with debugging
-
+#debugging cloud storage
 def check_result_exists(run_id, filename):
     """Check if a specific file exists for the run in cloud storage"""
     try:
@@ -106,20 +105,20 @@ def add_empty_report(run_id):
             logger.error("Failed to initialize storage for creating empty report")
             return False
         
-        # Check if report already exists
+        #  report already exists ?
         report_path = f"{run_id}/results/report.md"
         blob = bucket.blob(report_path)
         
         if not blob.exists():
             logger.warning(f"Report doesn't exist, creating empty placeholder: {report_path}")
             
-            # Create a simple empty report
+            #  empty report
             empty_report = "# Analysis Report (Placeholder)\n\nThis is an automatically generated placeholder report."
             
             # Upload the empty report
             blob.upload_from_string(empty_report)
             
-            # Generate a signed URL
+            #  a signed URL
             signed_url = blob.generate_signed_url(
                 expiration=datetime.timedelta(hours=24),
                 method="GET"
@@ -134,7 +133,8 @@ def add_empty_report(run_id):
     except Exception as e:
         logger.error(f"Error creating empty report: {e}")
         return False
-        
+
+#this kind of function scales especially well between multiple GCP instances:
 def upload_pipeline_outputs(run_id):
     """Upload all pipeline outputs to cloud storage with a specific run ID"""
     logger.info(f"Starting upload of pipeline outputs for run ID: {run_id}")
@@ -147,7 +147,7 @@ def upload_pipeline_outputs(run_id):
         file_urls = {}
         file_count = 0
         
-        # Upload all files from the output directories
+        # upload files
         for dir_name in LOCAL_OUTPUT_DIRS:
             if os.path.exists(dir_name):
                 logger.info(f"Processing directory: {dir_name}")
@@ -251,7 +251,7 @@ def get_file_url(run_id, local_path):
             logger.error(f"Failed to initialize storage bucket for {run_id}/{local_path}")
             return None
 
-        # Try various path formats
+        #  various path formats
         path_formats = [
             f"{run_id}/{local_path}",          #  path
             f"{run_id}/{local_path.lstrip('/')}", #  leading slash if present
@@ -259,7 +259,7 @@ def get_file_url(run_id, local_path):
             f"{run_id}/{os.path.basename(local_path)}"  
         ]
         
-        # Try each path format
+        #  each path format
         for cloud_path in path_formats:
             logger.info(f"Trying path: {cloud_path}")
             blob = bucket.blob(cloud_path)
@@ -285,7 +285,7 @@ def get_file_url(run_id, local_path):
                         logger.warning(f"Could not make blob public: {public_error}")
                         pass
 
-        # If we reach here, the file wasn't found in any of the tried paths
+        # file not found? uh oh!
         logger.error(f"File not found in cloud storage: tried {path_formats}")
         return None
     except Exception as e:
