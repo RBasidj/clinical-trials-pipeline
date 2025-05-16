@@ -1,5 +1,6 @@
 from collections import Counter
 
+# prompt engineering?
 def generate_qualitative_insights(processed_trials, enriched_interventions):
     """Generate deeper qualitative insights about trends"""
     
@@ -28,6 +29,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
             int_name = intervention.get('name')
             if int_name:
                 for enriched in enriched_interventions:
+#necessary
                     if enriched.get('name') == int_name:
                         early_modalities.append(enriched.get('modality', 'unknown'))
                         break
@@ -54,7 +56,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
         elif early_count > late_count:
             modality_insights.append(f"There appears to be a decreasing trend in {modality} interventions.")
     
-    # 2. Trends in outcome measures
+    # outcome measures can be found directly
     outcome_insights = []
     
     early_primary = []
@@ -94,7 +96,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
     elif early_clinical > late_clinical:
         outcome_insights.append("There is a decreasing focus on clinical outcomes over time.")
     
-    # 3.  trial design trends
+    # now look for trial design trends
     design_insights = []
     
     #  enrollment changes
@@ -129,6 +131,7 @@ def generate_qualitative_insights(processed_trials, enriched_interventions):
     
     return {
         "modality_trends": modality_insights,
+        #improve modality trends if revising script
         "outcome_trends": outcome_insights,
         "design_trends": design_insights
     }
