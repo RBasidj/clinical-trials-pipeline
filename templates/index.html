@@ -223,49 +223,10 @@
             color: var(--text-primary);
         }
         
-        /* Ticker tape animation */
-        .ticker-container {
-            background: var(--input-bg);
-            overflow: hidden;
-            white-space: nowrap;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 40px;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .ticker {
-            display: inline-block;
-            padding-left: 100%;
-            animation: ticker 60s linear infinite;
-        }
-        
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
-        }
-        
-        .ticker-item {
-            display: inline-block;
-            padding: 0 2rem;
-            color: var(--text-secondary);
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.85rem;
-        }
-        
-        .ticker-up {
-            color: #4ade80;
-        }
-        
-        .ticker-down {
-            color: #f87171;
-        }
-        
         /* Footer */
         .footer {
             position: fixed;
-            bottom: 40px;
+            bottom: 0;
             width: 100%;
             background: var(--bg-darker);
             padding: 1rem 0;
@@ -274,6 +235,28 @@
             color: var(--text-secondary);
             z-index: 10;
         }
+        .text-secondary, .form-text, .step-description, .stat-label, .info-label {
+    color: var(--text-secondary) !important;
+}
+
+.text-primary, .step-label, h5, h1, h2, h3, h4, p, .stat-value, .info-value {
+    color: var(--text-primary) !important;
+}
+
+.card-body p {
+    color: var(--text-primary) !important;
+}
+
+.feature-list li {
+    color: var(--text-secondary) !important;
+}
+
+.alert-warning {
+    background-color: rgba(250, 204, 21, 0.1) !important;
+    border-color: rgba(250, 204, 21, 0.3) !important;
+    color: #facc15 !important;
+}
+
     </style>
 </head>
 <body>
@@ -372,21 +355,14 @@
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Last API Update</span>
-                            <span class="stat-value">May 10, 2025</span>
+                            <span class="stat-value">May 15, 2025</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     
-    <footer class="footer text-center">
-        <div class="container">
-            <span>© 2025 Clinical Trials Analysis Platform • </span>
-            <span>Data from ClinicalTrials.gov • Last Updated: May 15, 2025</span>
-        </div>
-    </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

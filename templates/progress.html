@@ -1,192 +1,582 @@
-## File: templates/progress.html
-## Location: Replace contents
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Analysis in Progress</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis in Progress | Clinical Trials Analysis</title>
+    
+    <!-- Base Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
-        body { 
-            padding-top: 2rem; 
-            background-color: #f8f9fa;
+        :root {
+            --bg-dark: #0e1117;
+            --bg-darker: #090c13;
+            --bg-card: #171c26;
+            --accent: #4a8cff;
+            --accent-dark: #3a70cc;
+            --text-primary: #e6e9f0;
+            --text-secondary: #a2a9bc;
+            --border-color: #2c313c;
+            --input-bg: #12151f;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            --highlight: #373b47;
+            --chart-grid: #252a37;
+            --success: #4ade80;
+            --danger: #f87171;
+            --warning: #facc15;
         }
-        .spinner-container { 
-            padding: 50px 0; 
-            text-align: center; 
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding-top: 2rem;
+            line-height: 1.6;
         }
-        .spinner-border { 
-            width: 5rem; 
-            height: 5rem; 
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto 5rem;
         }
-        .progress-container {
-            margin-top: 2rem;
-        }
-        .progress {
-            height: 25px;
-            margin-bottom: 1rem;
-        }
-        .step-indicator {
+        
+        .brand-header {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
             margin-bottom: 2rem;
         }
-        .step {
-            text-align: center;
-            width: 25%;
-        }
-        .step-icon {
-            display: inline-block;
+        
+        .logo-mark {
             width: 40px;
             height: 40px;
-            line-height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border-radius: 8px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-mark i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        h1 {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: rgba(0,0,0,.1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+        }
+        
+        .card-header h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .spinner-container {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .custom-spinner {
+            width: 5rem;
+            height: 5rem;
+            border: 0.35rem solid var(--border-color);
+            border-right-color: var(--accent);
             border-radius: 50%;
-            background-color: #dee2e6;
-            color: #6c757d;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+            animation: spinner-border 1.2s linear infinite;
         }
-        .step.active .step-icon {
-            background-color: #007bff;
-            color: white;
+        
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
         }
-        .step.completed .step-icon {
-            background-color: #28a745;
-            color: white;
+        
+        .progress {
+            height: 0.8rem;
+            background-color: var(--input-bg);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 1.5rem 0;
         }
+        
+        .progress-bar {
+            background: linear-gradient(to right, var(--accent), var(--accent-dark));
+            transition: width 0.5s ease;
+        }
+        
+        .processing-steps {
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .step-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .step-item:last-child {
+            border-bottom: none;
+        }
+        
+        .step-item.pending {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        
+        .step-item.active {
+            background-color: rgba(74, 140, 255, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .step-item.completed {
+            color: var(--success);
+        }
+        
+        .step-icon {
+            margin-right: 1rem;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .step-icon i {
+            font-size: 1.2rem;
+        }
+        
+        .step-content {
+            flex-grow: 1;
+        }
+        
+        .step-label {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+        
+        .step-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.5rem;
+        }
+        
+        .info-item {
+            flex: 1 0 calc(50% - 1rem);
+            margin: 0.5rem;
+            background-color: var(--input-bg);
+            padding: 0.8rem 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        .info-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            font-weight: 500;
+        }
+        
+        .badge.bg-warning {
+            background-color: rgba(250, 204, 21, 0.2) !important;
+            color: var(--warning);
+        }
+        
+        .console-output {
+            background-color: var(--input-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .console-line {
+            padding: 0.2rem 0;
+        }
+        
+        .console-timestamp {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg-darker);
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            z-index: 10;
+        }
+        .text-secondary, .form-text, .step-description, .stat-label, .info-label {
+    color: var(--text-secondary) !important;
+}
+
+.text-primary, .step-label, h5, h1, h2, h3, h4, p, .stat-value, .info-value {
+    color: var(--text-primary) !important;
+}
+
+.card-body p {
+    color: var(--text-primary) !important;
+}
+
+.feature-list li {
+    color: var(--text-secondary) !important;
+}
+
+.alert-warning {
+    background-color: rgba(250, 204, 21, 0.1) !important;
+    border-color: rgba(250, 204, 21, 0.3) !important;
+    color: #facc15 !important;
+}
+
     </style>
-    <meta http-equiv="refresh" content="5;url=">
 </head>
 <body>
     <div class="container">
-        <h1 class="mb-4">Analysis in Progress</h1>
+        <div class="brand-header">
+            <div class="logo-mark">
+                <i class="bi bi-bar-chart-fill"></i>
+            </div>
+            <div>
+                <h1>Analysis in Progress</h1>
+                <p class="subtitle">Processing Data and Generating Insights</p>
+            </div>
+        </div>
         
         <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-activity me-2"></i>Processing Status</h5>
+            </div>
             <div class="card-body">
                 <div class="spinner-container">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                    <div class="custom-spinner"></div>
+                    <h3 id="status-message" class="mt-3 mb-2">Analyzing Clinical Trials Data</h3>
+                    <p class="text-secondary">Estimated completion in <span id="remaining-time">1-2 minutes</span></p>
+                </div>
+                
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                
+                <div class="processing-steps" id="processing-steps">
+                    <div class="step-item active" id="step-fetch">
+                        <div class="step-icon">
+                            <i class="bi bi-download"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-label">Fetching Clinical Trials</div>
+                            <div class="step-description">Querying ClinicalTrials.gov API for {{ disease }}</div>
+                        </div>
                     </div>
-                    <h3 class="mt-4">Your analysis is running...</h3>
-                    <p class="text-muted">This page will refresh automatically every 5 seconds.</p>
                     
-                    <div class="progress-container">
-                        <div class="progress">
-                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                    <div class="step-item pending" id="step-process">
+                        <div class="step-icon">
+                            <i class="bi bi-filter-square"></i>
                         </div>
-                        
-                        <div class="step-indicator">
-                            <div class="step completed">
-                                <div class="step-icon">1</div>
-                                <div class="step-label">Data Extraction</div>
-                            </div>
-                            <div class="step active">
-                                <div class="step-icon">2</div>
-                                <div class="step-label">Data Processing</div>
-                            </div>
-                            <div class="step">
-                                <div class="step-icon">3</div>
-                                <div class="step-label">Analysis</div>
-                            </div>
-                            <div class="step">
-                                <div class="step-icon">4</div>
-                                <div class="step-label">Visualization</div>
-                            </div>
+                        <div class="step-content">
+                            <div class="step-label">Processing Trial Data</div>
+                            <div class="step-description">Extracting relevant information from API responses</div>
                         </div>
                     </div>
+                    
+                    <div class="step-item pending" id="step-enrich">
+                        <div class="step-icon">
+                            <i class="bi bi-magic"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-label">Enrichment Pipeline</div>
+                            <div class="step-description">Adding modality and target information to interventions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending" id="step-analyze">
+                        <div class="step-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-label">Analyzing Patterns</div>
+                            <div class="step-description">Identifying trends and extracting insights</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending" id="step-visualize">
+                        <div class="step-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-label">Generating Visualizations</div>
+                            <div class="step-description">Creating charts and visual aids</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item pending" id="step-report">
+                        <div class="step-icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-label">Finalizing Report</div>
+                            <div class="step-description">Compiling all results into a comprehensive report</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="console-output" id="console-output">
+                    <div class="console-line"><span class="console-timestamp">00:00</span> Starting analysis pipeline for {{ disease }}</div>
+                    <div class="console-line"><span class="console-timestamp">00:01</span> Initializing API connection to ClinicalTrials.gov...</div>
+                    <div class="console-line"><span class="console-timestamp">00:02</span> Connected successfully, beginning data fetch</div>
                 </div>
             </div>
         </div>
         
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">Analysis Details</h5>
+                <h5><i class="bi bi-info-circle me-2"></i>Analysis Details</h5>
             </div>
             <div class="card-body">
-                <p><strong>Run ID:</strong> {{ run_id }}</p>
-                <p><strong>Status:</strong> <span class="badge bg-warning">Running</span></p>
-                <p><strong>Started:</strong> <span id="start-time">Calculating...</span></p>
-                <p><strong>Running Time:</strong> <span id="running-time">Calculating...</span></p>
-                <p><strong>Current Process:</strong> <span id="current-process">Initializing analysis...</span></p>
+                <div class="info-row">
+                    <div class="info-item">
+                        <span class="info-label">Analysis ID</span>
+                        <span class="info-value">{{ run_id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">
+                            <span class="badge bg-warning">Running</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Disease/Condition</span>
+                        <span class="info-value">{{ disease }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Max Trials</span>
+                        <span class="info-value">{{ run_info.max_trials }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Years Back</span>
+                        <span class="info-value">{{ run_info.years_back }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Industry Only</span>
+                        <span class="info-value">{% if run_info.industry_only %}Yes{% else %}No{% endif %}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Started At</span>
+                        <span class="info-value" id="start-time">Calculating...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Running Time</span>
+                        <span class="info-value" id="running-time">0:00</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Progress simulation
-        let progressValue = 25;
-        let currentStep = 2;
-        const steps = ['Data Extraction', 'Data Processing', 'Analysis', 'Visualization'];
-        const processes = [
-            'Fetching clinical trials data...',
-            'Processing trial data and extracting interventions...',
-            'Analyzing data and generating insights...',
-            'Creating visualizations and reports...'
+        // Simulate progress - this will be replaced with real API calls
+        let currentStep = 0;
+        const steps = ["step-fetch", "step-process", "step-enrich", "step-analyze", "step-visualize", "step-report"];
+        const stepMessages = [
+            "Fetching Clinical Trials Data...",
+            "Processing Trial Information...",
+            "Enriching with Modality and Target Information...",
+            "Analyzing Trends and Patterns...",
+            "Generating Data Visualizations...",
+            "Creating Final Report..."
         ];
         
-        function updateProgress() {
-            progressValue += Math.floor(Math.random() * 5) + 1;
-            if (progressValue > 100) progressValue = 100;
+        // Initialize progress counter
+        let progress = 0;
+        
+        function updateProgressBar() {
+            // Update progress percentage (capped at 95% until complete)
+            progress = Math.min(((currentStep + 1) / steps.length) * 100, 95);
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('status-message').textContent = stepMessages[currentStep];
             
-            document.getElementById('progress-bar').style.width = `${progressValue}%`;
-            document.getElementById('progress-bar').textContent = `${progressValue}%`;
-            document.getElementById('progress-bar').setAttribute('aria-valuenow', progressValue);
+            // Update estimated time
+            const stepsLeft = steps.length - currentStep;
+            if (stepsLeft <= 1) {
+                document.getElementById('remaining-time').textContent = "less than 1 minute";
+            } else {
+                document.getElementById('remaining-time').textContent = `${stepsLeft-1}-${stepsLeft} minutes`;
+            }
             
-            // Update steps based on progress
-            if (progressValue >= 75 && currentStep < 4) {
-                document.querySelectorAll('.step')[2].classList.add('completed');
-                document.querySelectorAll('.step')[2].classList.remove('active');
-                document.querySelectorAll('.step')[3].classList.add('active');
-                currentStep = 4;
-                document.getElementById('current-process').textContent = processes[3];
-            } else if (progressValue >= 50 && currentStep < 3) {
-                document.querySelectorAll('.step')[1].classList.add('completed');
-                document.querySelectorAll('.step')[1].classList.remove('active');
-                document.querySelectorAll('.step')[2].classList.add('active');
-                currentStep = 3;
-                document.getElementById('current-process').textContent = processes[2];
+            // Update steps UI
+            updateStepStatus();
+            
+            // Add console output
+            addConsoleMessage(`Starting ${stepMessages[currentStep].toLowerCase()}`);
+        }
+        
+        function updateStepStatus() {
+            for (let i = 0; i < steps.length; i++) {
+                const stepEl = document.getElementById(steps[i]);
+                if (i < currentStep) {
+                    stepEl.className = "step-item completed";
+                    stepEl.querySelector('.bi').className = "bi bi-check-circle";
+                } else if (i === currentStep) {
+                    stepEl.className = "step-item active";
+                } else {
+                    stepEl.className = "step-item pending";
+                }
             }
         }
         
-        // refresh API status
-        function checkStatus() {
-            fetch('/api/status/{{ run_id }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'completed' || data.status === 'error') {
-                        window.location.href = '/results/{{ run_id }}';
-                    }
-                    
-                    // formatting the start-time
-                    if (data.start_time) {
-                        const startTime = new Date(data.start_time);
-                        document.getElementById('start-time').textContent = startTime.toLocaleString();
-                        
-                        // calculate the runtime
-                        const now = new Date();
-                        const diffMs = now - startTime;
-                        const diffMins = Math.floor(diffMs / 60000);
-                        const diffSecs = Math.floor((diffMs % 60000) / 1000);
-                        document.getElementById('running-time').textContent = 
-                            `${diffMins} minutes, ${diffSecs} seconds`;
-                    }
-                    
-                    // progress updates
-                    updateProgress();
-                })
-                .catch(error => {
-                    console.error('Error checking status:', error);
-                    // progress updates on errors
-                    updateProgress();
-                });
+        function addConsoleMessage(message) {
+            const consoleOutput = document.getElementById('console-output');
+            const elapsed = document.getElementById('running-time').textContent;
+            const newLine = document.createElement('div');
+            newLine.className = 'console-line';
+            newLine.innerHTML = `<span class="console-timestamp">${elapsed}</span> ${message}`;
+            consoleOutput.appendChild(newLine);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
         }
         
-        document.getElementById('current-process').textContent = processes[1];
+// Replace the existing time calculation code with this:
+function checkStatus() {
+    fetch('/api/status/{{ run_id }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'completed' || data.status === 'error') {
+                window.location.href = '/results/{{ run_id }}';
+            }
+            
+            // Format start time
+            if (data.start_time) {
+                const startTime = new Date(data.start_time);
+                document.getElementById('start-time').textContent = startTime.toLocaleString();
+                
+                // Calculate running time
+                const now = new Date();
+                const timeDiff = Math.max(0, now - startTime); // Ensure non-negative
+                const diffMins = Math.floor(timeDiff / 60000);
+                const diffSecs = Math.floor((timeDiff % 60000) / 1000);
+                document.getElementById('running-time').textContent = 
+                    `${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
+            }
+        })
+        .catch(error => console.error('Error checking status:', error));
+}
+
+let startTimestamp = new Date();
+
+function updateRunningTime() {
+    const now = new Date();
+    const diffMs = now - startTimestamp;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffSecs = Math.floor((diffMs % 60000) / 1000);
+    document.getElementById('running-time').textContent = 
+        `${diffMins}:${diffSecs < 10 ? '0' : ''}${diffSecs}`;
+}
+
+// Update running time every second
+setInterval(updateRunningTime, 1000);
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    startTimestamp = new Date();
+    updateRunningTime();
+});
+
+        // Simulate step progress
+        function simulateProgress() {
+            // This is just for the simulation effect
+            // In the real app, progress would be determined by API responses
+            if (currentStep < steps.length - 1) {
+                setTimeout(() => {
+                    currentStep++;
+                    updateProgressBar();
+                    simulateProgress();
+                }, Math.random() * 3000 + 2000); // Random time between 2-5 seconds per step
+            }
+        }
+        
+        // Initialize UI
+        updateProgressBar();
+        simulateProgress();
         
         // Check status every 5 seconds
         checkStatus();
         setInterval(checkStatus, 5000);
+        
+        // Update running time every second
+        setInterval(() => {
+            const timeElement = document.getElementById('running-time');
+            let [mins, secs] = timeElement.textContent.split(':').map(num => parseInt(num));
+            secs++;
+            if (secs >= 60) {
+                mins++;
+                secs = 0;
+            }
+            timeElement.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }, 1000);
     </script>
 </body>
 </html>

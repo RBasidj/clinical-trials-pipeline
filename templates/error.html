@@ -1,48 +1,281 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Analysis Error</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Error | Clinical Trials Analysis</title>
+    
+    <!-- Base Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
-        body { padding-top: 2rem; }
+        :root {
+            --bg-dark: #0e1117;
+            --bg-darker: #090c13;
+            --bg-card: #171c26;
+            --accent: #4a8cff;
+            --accent-dark: #3a70cc;
+            --text-primary: #e6e9f0;
+            --text-secondary: #a2a9bc;
+            --border-color: #2c313c;
+            --input-bg: #12151f;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            --highlight: #373b47;
+            --chart-grid: #252a37;
+            --danger: #f87171;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding-top: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto 5rem;
+        }
+        
+        .brand-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border-radius: 8px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-mark i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        h1 {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: rgba(0,0,0,.1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+        }
+        
+        .card-header h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .alert-danger {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: var(--danger);
+            border-radius: 8px;
+        }
+        
+        .alert-heading {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--danger);
+        }
+        
+        pre {
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--accent), var(--accent-dark));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(74, 140, 255, 0.25);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, var(--accent-dark), var(--accent-dark));
+            box-shadow: 0 4px 12px rgba(74, 140, 255, 0.35);
+            transform: translateY(-1px);
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg-darker);
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            z-index: 10;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-item {
+            padding: 0.75rem 1rem;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        
+        .info-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .text-secondary, .form-text, .step-description, .stat-label, .info-label {
+    color: var(--text-secondary) !important;
+}
+
+.text-primary, .step-label, h5, h1, h2, h3, h4, p, .stat-value, .info-value {
+    color: var(--text-primary) !important;
+}
+
+.card-body p {
+    color: var(--text-primary) !important;
+}
+
+.feature-list li {
+    color: var(--text-secondary) !important;
+}
+
+.alert-warning {
+    background-color: rgba(250, 204, 21, 0.1) !important;
+    border-color: rgba(250, 204, 21, 0.3) !important;
+    color: #facc15 !important;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="mb-4">Analysis Error</h1>
+        <div class="brand-header">
+            <div class="logo-mark">
+                <i class="bi bi-bar-chart-fill"></i>
+            </div>
+            <div>
+                <h1>Analysis Error</h1>
+                <p class="subtitle">Clinical Trials Analysis Platform</p>
+            </div>
+        </div>
         
         <div class="alert alert-danger mb-4">
-            <h4 class="alert-heading">An error occurred during analysis</h4>
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>An error occurred during analysis</h4>
             <p>The analysis could not be completed due to an error. See details below.</p>
         </div>
         
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">Error Details</h5>
+                <h5><i class="bi bi-bug me-2"></i>Error Details</h5>
             </div>
             <div class="card-body">
-                <pre class="bg-light p-3">{{ error }}</pre>
+                <pre>{{ error }}</pre>
                 
                 <div class="mt-4">
-                    <a href="/" class="btn btn-primary">Try Again</a>
+                    <a href="/" class="btn btn-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Return to Analysis Form
+                    </a>
                 </div>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Analysis Request Details</h5>
+                <h5><i class="bi bi-info-circle me-2"></i>Analysis Request Details</h5>
             </div>
             <div class="card-body">
-                <p><strong>Run ID:</strong> {{ run_id }}</p>
-                <p><strong>Disease:</strong> {{ run_info.disease }}</p>
-                <p><strong>Max Trials:</strong> {{ run_info.max_trials }}</p>
-                <p><strong>Years Back:</strong> {{ run_info.years_back }}</p>
-                <p><strong>Industry Only:</strong> {% if run_info.industry_only %}Yes{% else %}No{% endif %}</p>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Run ID</span>
+                        <span class="info-value">{{ run_id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Disease</span>
+                        <span class="info-value">{{ run_info.disease }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Max Trials</span>
+                        <span class="info-value">{{ run_info.max_trials }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Years Back</span>
+                        <span class="info-value">{{ run_info.years_back }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Industry Only</span>
+                        <span class="info-value">{% if run_info.industry_only %}Yes{% else %}No{% endif %}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Financial Analysis</span>
+                        <span class="info-value">{% if run_info.financial_analysis %}Yes{% else %}No{% endif %}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
